@@ -235,6 +235,7 @@ def rf_on_best_features():
 
 
 if __name__ == "__main__":
+    print("Hello world")
     # best_feature_selection()
     # t_sne()
     # pca()
