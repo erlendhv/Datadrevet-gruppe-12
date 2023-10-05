@@ -4,7 +4,7 @@
 
 ## Overview
 
-This GitHub repository contains a comprehensive dataset providing detailed information about students' enrollment in various courses, their personal characteristics, academic performance, and economic indicators. This dataset is a valuable resource for data preprocessing and modeling techniques using Python. 
+This GitHub repository contains a comprehensive dataset providing detailed information about students' enrollment in various courses, their personal characteristics, academic performance, and economic indicators. This dataset is a valuable resource for data preprocessing and modeling techniques using Python.
 
 ### Dataset Description
 
@@ -26,11 +26,11 @@ The dataset encompasses a wide range of fields, including:
 
 This repository contains the following files and folders:
 
-- **`dataset.csv`**: The dataset file in CSV format containing all the student enrollment and academic performance data.
+- **`graduation_dataset.csv`**: The dataset file in CSV format containing all the student enrollment and academic performance data.
 
-- **`data_preprocessing.ipynb`**: A Jupyter Notebook that demonstrates Python methods for data preprocessing on the dataset. It includes steps for cleaning, handling missing data, encoding categorical variables, and performing feature engineering.
+- **`data_preprocessing.py`**: A Jupyter Notebook that demonstrates Python methods for data preprocessing on the dataset. It includes steps for cleaning, handling missing data, encoding categorical variables, and performing feature engineering.
 
-- **`data_modeling.ipynb`**: Another Jupyter Notebook that showcases various data modeling techniques using Python. It covers tasks such as exploratory data analysis, feature selection, and model building. You'll find examples of regression, classification, or any other relevant modeling techniques.
+- **`data_modeling.py`**: Another Jupyter Notebook that showcases various data modeling techniques using Python. It covers tasks such as exploratory data analysis, feature selection, and model building. You'll find examples of regression, classification, or any other relevant modeling techniques.
 
 - **`LICENSE`**: The license information for using the dataset and code in this repository.
 
@@ -42,11 +42,11 @@ To get started with using this dataset and the Python methods for data preproces
 
 1. Clone or download this repository to your local machine.
 
-2. Open the Jupyter Notebooks (`data_preprocessing.ipynb` and `data_modeling.ipynb`) using Jupyter Notebook or a compatible environment.
+2. Open the Python files (`data_preprocessing.py` and `data_modeling.py`).
 
 3. Follow the instructions and code within the notebooks to explore, preprocess, and model the data.
 
-4. You can use the provided dataset (`dataset.csv`) or replace it with your own data, making sure it follows a similar structure.
+4. You can use the provided dataset (`graduation_dataset.csv`) or replace it with your own data, making sure it follows a similar structure.
 
 ### Citation
 
@@ -56,6 +56,6 @@ If you use this dataset or find the provided code and techniques useful for your
 
 We would like to express our gratitude to the contributors and organizations that made this dataset available for research and analysis.
 
-For any questions, issues, or suggestions related to this repository, please feel free to [create an issue](https://github.com/yourusername/your-repo-name/issues) or contact the repository owner.
+For any questions, issues, or suggestions related to this repository, please feel free to [create an issue](https://github.com/erlendhv/Datadrevet-gruppe-12/issues) or contact the repository owner.
 
 Happy data preprocessing and modeling!
