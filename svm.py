@@ -10,13 +10,6 @@ from sklearn.metrics import confusion_matrix, classification_report
 
 # Load the dataset
 data = pd.read_csv("graduation_dataset2TokyoDrift.csv")
-target_mapping = {
-     "Dropout": 0,
-     "Enrolled": 0,
-     "Graduate": 1
-}
-
-data.replace({"Target": target_mapping}, inplace=True)
 
 print(data.info())
 
