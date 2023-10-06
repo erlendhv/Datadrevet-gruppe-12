@@ -11,8 +11,8 @@ from sklearn.metrics import confusion_matrix, classification_report
 # Load the dataset
 data = pd.read_csv("graduation_dataset2TokyoDrift.csv")
 target_mapping = {
-     "Dropout": 1,
-     "Enrolled": 1,
+     "Dropout": 0,
+     "Enrolled": 0,
      "Graduate": 1
 }
 
@@ -24,7 +24,7 @@ print(data.info())
 training_set, test_set = train_test_split(data, test_size=0.2, random_state=1)
 
 # Extract features and labels
-column= 29
+column= 30
 X_train = training_set.iloc[:, 0:column].values
 Y_train = training_set.iloc[:, column].values
 X_test = test_set.iloc[:, 0:column].values
@@ -42,11 +42,13 @@ classifier.fit(X_train, Y_train)
 Y_pred = classifier.predict(X_test)
 test_set["Predictions"] = Y_pred
 
+n=0
+antall=0
 for row in Y_pred:
-    
-    if row != 1 and row != 0:
-    
-        print(row)
+    antall+=1
+    if row == 1:
+        n+=1
+print("Antall faliures: ",n/antall*100,"%")
     
     
 print(classification_report(Y_test, Y_pred))
