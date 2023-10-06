@@ -17,7 +17,7 @@ print(data.info())
 training_set, test_set = train_test_split(data, test_size=0.2, random_state=1)
 
 # Extract features and labels
-column= 30
+column= 34
 X_train = training_set.iloc[:, 0:column].values
 Y_train = training_set.iloc[:, column].values
 X_test = test_set.iloc[:, 0:column].values
