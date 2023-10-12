@@ -10,7 +10,13 @@ from sklearn.preprocessing import StandardScaler
 
 
 # Load the dataset
-data = pd.read_csv("graduation_dataset2TokyoDrift.csv")
+data = pd.read_csv("graduation_dataset.csv")
+target_mapping = {
+     "Dropout": 0,
+     "Enrolled": 0,
+     "Graduate": 1
+}
+data.replace({"Target": target_mapping}, inplace=True)
 
 print(data.info())
 #remove International, curricular units 1st sem, Education special needs, displacecd, fathers occupation, mothers qualification, nacionality, daytaime/evening attendance, inflation rate, GDP
@@ -45,14 +51,6 @@ classifier.fit(X_train, Y_train)
 # Predict on the test set
 Y_pred = classifier.predict(X_test)
 test_set["Predictions"] = Y_pred
-
-n=0
-antall=0
-for row in Y_pred:
-    antall+=1
-    if row == 1:
-        n+=1
-print("Antall faliures: ",n/antall*100,"%")
     
     
 print(classification_report(Y_test, Y_pred))
