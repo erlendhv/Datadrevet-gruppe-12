@@ -19,9 +19,7 @@ target_mapping = {
 data.replace({"Target": target_mapping}, inplace=True)
 
 print(data.info())
-#remove International, curricular units 1st sem, Education special needs, displacecd, fathers occupation, mothers qualification, nacionality, daytaime/evening attendance, inflation rate, GDP
-#data = data.drop([], axis=1)
-data = data.drop(columns=['International', 'Curricular units 1st sem (credited)', 'Educational special needs', 'Displaced', "Father\'s occupation", 'Mother\'s qualification', 'Nacionality', 'Daytime/evening attendance', 'Inflation rate', 'GDP'])
+#data = data.drop(columns=['International', 'Curricular units 1st sem (credited)', 'Educational special needs', 'Displaced', "Father\'s occupation", 'Mother\'s qualification', 'Nacionality', 'Daytime/evening attendance', 'Inflation rate', 'GDP'])
 
 
 
@@ -39,6 +37,7 @@ Y_test = test_set.iloc[:, column].values
 sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
+
 
 # Encode the class labels
 le = LabelEncoder()
