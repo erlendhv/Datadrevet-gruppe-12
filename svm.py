@@ -9,7 +9,14 @@ from sklearn.metrics import confusion_matrix, classification_report
 
 
 # Load the dataset
-data = pd.read_csv("graduation_dataset2TokyoDrift.csv")
+
+data = pd.read_csv("graduation_dataset.csv")
+target_mapping = {
+     "Dropout": 0,
+     "Enrolled": 0,
+     "Graduate": 1
+}
+data.replace({"Target": target_mapping}, inplace=True)
 
 print(data.info())
 
@@ -34,23 +41,14 @@ classifier.fit(X_train, Y_train)
 # Predict on the test set
 Y_pred = classifier.predict(X_test)
 test_set["Predictions"] = Y_pred
-
-n=0
-antall=0
-for row in Y_pred:
-    antall+=1
-    if row == 1:
-        n+=1
-print("Antall faliures: ",n/antall*100,"%")
-    
-    
+        
 print(classification_report(Y_test, Y_pred))
 # Calculate accuracy
 cm = confusion_matrix(list(Y_test), Y_pred)
 accuracy = float(np.diagonal(cm).sum()) / len(Y_test)
 print("\nAccuracy Of SVM For The Given Dataset: ", accuracy)
 
-# Visualization (2D decision boundary for binary classification)
+#Visualization (2D decision boundary for binary classification)
 # plt.figure(figsize=(7, 7))
 # X_set, y_set = X_train, Y_train
 # X1, X2 = np.meshgrid(np.arange(start=X_set[:, 0].min() - 1, stop=X_set[:, 0].max() + 1, step=0.01),
