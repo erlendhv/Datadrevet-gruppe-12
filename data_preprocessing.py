@@ -9,14 +9,12 @@ from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.feature_selection import mutual_info_classif, SelectKBest
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 class Preprocessing:
 
     def __init__(self) -> None:
         # Load your dataset
-        self.data = pd.read_csv("Datadrevet-gruppe-12/graduation_dataset.csv")  # Replace with your dataset file path
+        self.data = pd.read_csv("graduation_dataset.csv")  # Replace with your dataset file path
         # one hot encoding target column to numeric values
         target_mapping = {
             "Dropout": 0,
@@ -96,8 +94,6 @@ class Preprocessing:
         return pca_result
 
 
-
-
 # def kernel_pca():
 #     # Standardize the data
 #     scaler = StandardScaler()
@@ -132,9 +128,4 @@ class Preprocessing:
 if __name__ == "__main__":
     print("Happy data preprocessing and modeling!")
     preprocessing = Preprocessing()
-    t_sne = preprocessing.t_sne()
-    preprocessing.plot_t_sne(t_sne)
-    # best_feature_selection()
-    # t_sne()
-    # pca()
-    # kernel_pca()
+    t_sne = preprocessing.pca(plot=True, n_components=5)
