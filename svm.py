@@ -6,22 +6,33 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.preprocessing import StandardScaler
 
 
 # Load the dataset
 data = pd.read_csv("graduation_dataset2TokyoDrift.csv")
 
 print(data.info())
+#remove International, curricular units 1st sem, Education special needs, displacecd, fathers occupation, mothers qualification, nacionality, daytaime/evening attendance, inflation rate, GDP
+#data = data.drop([], axis=1)
+data = data.drop(columns=['International', 'Curricular units 1st sem (credited)', 'Educational special needs', 'Displaced', "Father\'s occupation", 'Mother\'s qualification', 'Nacionality', 'Daytime/evening attendance', 'Inflation rate', 'GDP'])
+
+
 
 # Split the data into training and test sets
 training_set, test_set = train_test_split(data, test_size=0.2, random_state=1)
 
 # Extract features and labels
-column= 34
+column = len(data.columns) - 1
 X_train = training_set.iloc[:, 0:column].values
 Y_train = training_set.iloc[:, column].values
 X_test = test_set.iloc[:, 0:column].values
 Y_test = test_set.iloc[:, column].values
+
+#standardize data
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
 
 # Encode the class labels
 le = LabelEncoder()
