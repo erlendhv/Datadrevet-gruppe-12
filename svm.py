@@ -2,7 +2,7 @@ from matplotlib.colors import ListedColormap
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.svm import SVC
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import confusion_matrix, classification_report
@@ -18,9 +18,9 @@ target_mapping = {
 }
 data.replace({"Target": target_mapping}, inplace=True)
 
-print(data.info())
-#data = data.drop(columns=['International', 'Curricular units 1st sem (credited)', 'Educational special needs', 'Displaced', "Father\'s occupation", 'Mother\'s qualification', 'Nacionality', 'Daytime/evening attendance', 'Inflation rate', 'GDP'])
 
+data = data.drop(columns=['International', 'Curricular units 1st sem (credited)', 'Educational special needs', 'Displaced', "Father\'s occupation", 'Mother\'s qualification', 'Nacionality', 'Daytime/evening attendance', 'Inflation rate', 'GDP'])
+print(data.info())
 
 
 # Split the data into training and test sets
@@ -38,13 +38,28 @@ sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
 
+#Hyperparameter tuning
+param_grid = {'C': [0.01, 0.1, 0.5, 1, 10, 100], 
+              'gamma': [1, 0.75, 0.5, 0.25, 0.1, 0.01, 0.001], 
+              'kernel': ['rbf', 'poly', 'linear']} 
+
+#param_grid = {'C': [0.01, 0.1], 
+#              'gamma': [1, 0.75], 
+#              'kernel': ['poly', 'linear']} 
+
+grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=1, cv=5)
+grid.fit(X_train, Y_train)
+
+best_params = grid.best_params_
+print(f"Best params: {best_params}")
+
 
 # Encode the class labels
 le = LabelEncoder()
 Y_train = le.fit_transform(Y_train)
 
 # Train the SVM classifier
-classifier = SVC()
+classifier = SVC(**best_params)
 classifier.fit(X_train, Y_train)
 
 # Predict on the test set
@@ -57,18 +72,3 @@ print(classification_report(Y_test, Y_pred))
 cm = confusion_matrix(list(Y_test), Y_pred)
 accuracy = float(np.diagonal(cm).sum()) / len(Y_test)
 print("\nAccuracy Of SVM For The Given Dataset: ", accuracy)
-
-# Visualization (2D decision boundary for binary classification)
-# plt.figure(figsize=(7, 7))
-# X_set, y_set = X_train, Y_train
-# X1, X2 = np.meshgrid(np.arange(start=X_set[:, 0].min() - 1, stop=X_set[:, 0].max() + 1, step=0.01),
-#                      np.arange(start=X_set[:, 1].min() - 1, stop=X_set[:, 1].max() + 1, step=0.01))
-# plt.contourf(X1, X2, classifier.predict(np.array([X1.ravel(), X2.ravel()]).T).reshape(X1.shape), alpha=0.75,
-#              cmap=ListedColormap(('black', 'white')))
-# plt.xlim(X1.min(), X1.max())
-# plt.ylim(X2.min(), X2.max())
-# for i, j in enumerate(np.unique(y_set)):
-#     plt.scatter(X_set[y_set == j, 0], X_set[y_set == j, 1], c=ListedColormap(('red', 'orange'))(i), label=j)
-# plt.title('Student dataset')
-# plt.legend()
-# plt.show()

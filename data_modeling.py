@@ -130,54 +130,6 @@ class data_modeling:
         print("Confusion Matrix:\n", confusion)
         print("Classification Report:\n", report)
 
-    def svm_on_tsne(self, data):
-        data = data.drop(columns=['International', 'Curricular units 1st sem (credited)', 'Educational special needs', 'Displaced', "Father\'s occupation", 'Mother\'s qualification', 'Nacionality', 'Daytime/evening attendance', 'Inflation rate', 'GDP'])
-        # Split the data into training and test sets
-        #training_set, test_set = train_test_split(data, test_size=0.2, random_state=1)
-        scaler = StandardScaler()
-        scaled_data = scaler.fit_transform(data)
-
-        #T-SNE
-        # Initialize t-SNE
-        tsne = TSNE(n_components=2, random_state=42)
-
-
-
-        # Fit and transform the data
-        X_tsne = tsne.fit_transform(scaled_data)
-
-        plt.figure(figsize=(10, 8))
-        plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c=self.data['Target'], cmap=plt.cm.get_cmap("viridis"), alpha=0.5)
-        plt.colorbar(label='Target')
-        plt.title('t-SNE Visualization')
-        plt.xlabel('t-SNE Dimension 1')
-        plt.ylabel('t-SNE Dimension 2')
-        plt.show()
-
-        #training_set, test_set, X_train, Y_test = train_test_split(X_tsne, data["Target"], test_size=0.2, random_state=42)
-        X_train, X_test, Y_train, Y_test = train_test_split(X_tsne, data["Target"], test_size=0.2, random_state=42)
-
-
-        # Encode the class labels
-        le = LabelEncoder()
-        Y_train = le.fit_transform(Y_train)
-
-        # Train the SVM classifier
-        classifier = SVC()
-        classifier.fit(X_train, Y_train)
-
-        # Predict on the test set
-        Y_pred = classifier.predict(X_test)
-            
-            
-        print(classification_report(Y_test, Y_pred))
-        # Calculate accuracy
-        cm = confusion_matrix(list(Y_test), Y_pred)
-        accuracy = float(np.diagonal(cm).sum()) / len(Y_test)
-        print("\nAccuracy Of SVM For The Given Dataset: ", accuracy)
-
-
-
 
 
 if __name__ == '__main__':
@@ -187,4 +139,3 @@ if __name__ == '__main__':
     # rf_on_best_features()
     # random_forest(X_train, y_train, X_test, y_test)
     data_modeling = data_modeling()
-    data_modeling.svm_on_tsne(data_modeling.data)
