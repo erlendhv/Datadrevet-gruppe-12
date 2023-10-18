@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.calibration import LabelEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
@@ -10,7 +9,6 @@ from sklearn.feature_selection import mutual_info_classif, SelectKBest
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-from sklearn.svm import SVC
 
 
 class data_modeling:
@@ -132,10 +130,10 @@ class data_modeling:
 
 
 
+
 if __name__ == '__main__':
     print("Happy data preprocessing and modeling!")
     # rf_on_tsne()
     # rf_on_pca()
     # rf_on_best_features()
     # random_forest(X_train, y_train, X_test, y_test)
-    data_modeling = data_modeling()
