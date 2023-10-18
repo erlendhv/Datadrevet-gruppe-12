@@ -8,6 +8,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.preprocessing import StandardScaler
 
+#This code is based on the svm code found at https://analyticsindiamag.com/understanding-the-basics-of-svm-with-example-and-python-implementation/
 
 # Load the dataset
 data = pd.read_csv("graduation_dataset.csv")
@@ -38,7 +39,7 @@ sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
 
-#Hyperparameter tuning
+#Hyperparameter tuning, from https://www.kaggle.com/code/faressayah/support-vector-machine-pca-tutorial-for-beginner
 param_grid = {'C': [0.01, 0.1, 0.5, 1, 10, 100], 
               'gamma': [1, 0.75, 0.5, 0.25, 0.1, 0.01, 0.001], 
               'kernel': ['rbf', 'poly', 'linear']} 
