@@ -40,9 +40,9 @@ X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
 
 #Hyperparameter tuning, from https://www.kaggle.com/code/faressayah/support-vector-machine-pca-tutorial-for-beginner
-param_grid = {'C': [0.01, 0.1, 0.5, 1, 10, 100], 
-              'gamma': [1, 0.75, 0.5, 0.25, 0.1, 0.01, 0.001], 
-              'kernel': ['rbf', 'poly', 'linear']} 
+param_grid = {'C': [0.01, 0.1, 0.5, 1, 10,25, 100], 
+              'gamma': [1, 0.75, 0.5, 0.25, 0.1, 0.01,0.005, 0.001], 
+              'kernel': ['rbf', 'poly', 'linear', 'sigmoid']} 
 
 #param_grid = {'C': [0.01, 0.1], 
 #              'gamma': [1, 0.75], 
