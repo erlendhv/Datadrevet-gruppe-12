@@ -230,6 +230,8 @@ if __name__ == '__main__':
 
     # heatmap(data)
 
+    # feature_extraction(data, True)
+
     """
     exploring data transformation
     """
@@ -244,9 +246,22 @@ if __name__ == '__main__':
     # pca21 = pca(data=data, plot=True, n_components=21)
     #best_model = hyperparameter_tuning_pca_rf(X_train, X_test, y_train, y_test)
 
-    """
-    try out optimal hyperparameters from best_model
-    """
+    # 
+    # comparing select k best, rf with pca, feature selction with random forest and just the full dataset
+    # on random forest to see how it impacts accuracy score
+    # 
+
+    sel_columns = select_n_best(17, data)
+    print('The most important features based on Select_K_Best:')
+    for feature in sel_columns:
+        print('- ' + feature)
+
+    x_sel_train, x_sel_test = X_train[[column for column in sel_columns]], X_test[[column for column in sel_columns]]
+
+    X_important_train, X_important_test = rf_sel(X_train,y_train)
+
+     # try out optimal hyperparameters from best_model on pca and rf
+    # 
     # Standardize the data 
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
@@ -261,18 +276,6 @@ if __name__ == '__main__':
     # Evaluate the model
     accuracy = rf.score(X_test_pca, y_test)
     print(f"Accuracy using PCA with some parameter tuning: {accuracy * 100:.2f}%")
-
-    """
-    comparing select k best, feature selction with random forest and just the full dataset
-    on random forest to see how it impacts accuracy score
-    """
-
-    sel_columns = select_n_best(15, data)
-    print('The most important features based on Select_K_Best:')
-    for feature in sel_columns:
-        print('- ' + feature)
-
-    X_important_train, X_important_test = rf_sel(X_train,y_train)
 
     # Create a random forest classifier
     rfc_full = RandomForestClassifier(random_state=0, criterion='gini')
@@ -295,17 +298,17 @@ if __name__ == '__main__':
     # random forest with feature selection using select k best
     rfc_sel = RandomForestClassifier(random_state=0, criterion='gini')
     # Train the classifier with limited features
-    rfc_sel.fit(X_train, y_train)
+    rfc_sel.fit(x_sel_train, y_train)
     # Make predictions
-    pred_sel = rfc_sel.predict(X_test)
+    pred_sel = rfc_sel.predict(x_sel_test)
     # Generate accuracy score
     print('The accuracy of classifier with features selected with select k best: {:.2f}'.format(accuracy_score(y_test, pred_sel)))
 
-    """
-    Notes:
+    # 
+    # Notes:
     
-    - should balance out data when using decision trees, biased to imbalance
-    - bagging and boosting can improve performance, ensemble learning (advanced models?)
-    - may not be neccessary with pca or other data transformation/dimension reduction
-    - can do hyperparameter tuning using GridSearchCV
-    """
+    # - should balance out data when using decision trees, biased to imbalance
+    # - bagging and boosting can improve performance, ensemble learning (advanced models?)
+    # - may not be neccessary with pca or other data transformation/dimension reduction
+    # - can do hyperparameter tuning using GridSearchCV
+    # 
