@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV, train_test_split
 from scipy.stats import randint
@@ -35,14 +35,8 @@ class data_modeling:
         rf_classifier.fit(X_train, y_train)
         # prediction
         y_pred = rf_classifier.predict(X_test)
-        # Evaluate the model
-        accuracy = accuracy_score(y_test, y_pred)
-        confusion = confusion_matrix(y_test, y_pred)
-        report = classification_report(y_test, y_pred)
-        # print evaluation
-        print("Accuracy:", accuracy)
-        print("Confusion Matrix:\n", confusion)
-        print("Classification Report:\n", report)
+
+        self.metrics("Random Forrest Classifier", y_test, y_pred)
 
 
         if tune:
@@ -103,11 +97,28 @@ class data_modeling:
         Y_pred = classifier.predict(X_test)
         test_set["Predictions"] = Y_pred
             
-        print(classification_report(Y_test, Y_pred))
-        # Calculate accuracy
-        cm = confusion_matrix(list(Y_test), Y_pred)
-        accuracy = float(np.diagonal(cm).sum()) / len(Y_test)
-        print("\nAccuracy Of SVM For The Given Dataset: ", accuracy)
+        self.metrics("SVM", Y_test, Y_pred)
+
+    def metrics(self, modelStr, Y_test, Y_pred):
+
+        print("\n---------")
+        print(f"\nMetrics for {modelStr}:\n")
+
+        # Define metrics
+        class_report = classification_report(Y_test, Y_pred)
+        acc_score = accuracy_score(Y_test, Y_pred)
+        conf_matrix = confusion_matrix(list(Y_test), Y_pred)
+        
+
+        # Print metrics
+        print(class_report)
+        print(f"Accuracy for {modelStr}: \n{acc_score}")
+        print(f"Confusion matrix for {modelStr}: \n{conf_matrix}\n")
+
+        # Display metrics
+        # disp = ConfusionMatrixDisplay(conf_matrix)
+        # disp.plot()
+        # plt.show()
 
 
 if __name__ == '__main__':
