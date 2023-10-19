@@ -29,7 +29,7 @@ class data_modeling:
 
 
         # RANDOM FOREST
-    def random_forest(self, X_train, y_train, X_test, y_test):
+    def random_forest(self, X_train, y_train, X_test, y_test, tune = False):
         rf_classifier = RandomForestClassifier(max_depth=9, max_features=5, min_samples_leaf=1, n_estimators=400, random_state=42)
 
         rf_classifier.fit(X_train, y_train)
@@ -44,34 +44,30 @@ class data_modeling:
         print("Confusion Matrix:\n", confusion)
         print("Classification Report:\n", report)
 
-        param_grid = {'n_estimators': [100, 200, 300, 400, 500],
-              'max_depth': [5, 9, 13, 17], 
-              'min_samples_leaf': [1, 2, 4, 6, 8],
-              'max_features': [3, 5, 7, 9, 11, 13]}
-        
-        # grid = GridSearchCV(SVC(), param_dist, refit=True, verbose=1, cv=5)
-        # grid.fit(X_train, y_train)
 
-        # best_params = grid.best_params_
-        # print(f"Best params: {best_params}")
+        if tune:
+            param_grid = {'n_estimators': [100, 200, 300, 400, 500],
+                'max_depth': [5, 9, 13, 17], 
+                'min_samples_leaf': [1, 2, 4, 6, 8],
+                'max_features': [3, 5, 7, 9, 11, 13]}
+            
+            # Create a based model
+            rf = RandomForestRegressor()
+            # Instantiate the grid search model
+            grid_search = GridSearchCV(estimator = rf, param_grid = param_grid, 
+                                    cv = 3, n_jobs = -1, verbose = 2)
 
-        # Create a based model
-        rf = RandomForestRegressor()
-        # Instantiate the grid search model
-        grid_search = GridSearchCV(estimator = rf, param_grid = param_grid, 
-                                cv = 3, n_jobs = -1, verbose = 2)
+            # Fit the random search object to the data
+            grid_search.fit(X_train, y_train)
+            # Create a variable for the best model
+            best_rf = grid_search.best_estimator_
 
-        # Fit the random search object to the data
-        grid_search.fit(X_train, y_train)
-        # Create a variable for the best model
-        best_rf = grid_search.best_estimator_
-
-        # Print the best hyperparameters
-        print('Best hyperparameters:',  grid_search.best_params_)
-        print('Best model:', best_rf)
+            # Print the best hyperparameters
+            print('Best hyperparameters:',  grid_search.best_params_)
+            print('Best model:', best_rf)
 
     #This code is based on the svm code found at https://analyticsindiamag.com/understanding-the-basics-of-svm-with-example-and-python-implementation/
-    def svm(self, X_train, Y_train, X_test, Y_test):
+    def svm(self, X_train, Y_train, X_test, Y_test, tune = False):
         # # Split the data into training and test sets
         training_set, test_set = train_test_split(self.data, test_size=0.25, random_state=1)
 
@@ -79,15 +75,17 @@ class data_modeling:
         sc = StandardScaler()
         X_train = sc.fit_transform(X_train)
         X_test = sc.transform(X_test)
-
+        
         #Hyperparameter tuning, from https://www.kaggle.com/code/faressayah/support-vector-machine-pca-tutorial-for-beginner
-        param_grid = {'C': [10], 
-                    'gamma': [0.01], 
-                    'kernel': ['rbf']} 
 
-        #param_grid = {'C': [0.01, 0.1], 
-        #              'gamma': [1, 0.75], 
-        #              'kernel': ['poly', 'linear']} 
+        if tune:
+            param_grid = {'C': [0.01, 0.1, 0.5, 1, 10, 100], 
+              'gamma': [1, 0.75, 0.5, 0.25, 0.1, 0.01, 0.001], 
+              'kernel': ['rbf', 'poly', 'linear']} 
+        else:
+            param_grid = {'C': [10], 
+                        'gamma': [0.01], 
+                        'kernel': ['rbf']} 
 
         grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=1, cv=5)
         grid.fit(X_train, Y_train)
