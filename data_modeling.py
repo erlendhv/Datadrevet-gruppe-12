@@ -78,14 +78,12 @@ class data_modeling:
         
         #Hyperparameter tuning, from https://www.kaggle.com/code/faressayah/support-vector-machine-pca-tutorial-for-beginner
 
-        if tune:
-            param_grid = {'C': [0.01, 0.1, 0.5, 1, 10, 100], 
-              'gamma': [1, 0.75, 0.5, 0.25, 0.1, 0.01, 0.001], 
-              'kernel': ['rbf', 'poly', 'linear']} 
-        else:
-            param_grid = {'C': [10], 
-                        'gamma': [0.01], 
-                        'kernel': ['rbf']} 
+        param_grid = {'C': [0.01, 0.1, 0.5, 1, 10, 100], 
+            'gamma': [1, 0.75, 0.5, 0.25, 0.1, 0.01, 0.001], 
+            'kernel': ['rbf', 'poly', 'linear']} if tune else {'C': [10], 
+                    'gamma': [0.01], 
+                    'kernel': ['rbf']} 
+
 
         grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=1, cv=5)
         grid.fit(X_train, Y_train)
@@ -117,4 +115,4 @@ if __name__ == '__main__':
 
     data_modeling = data_modeling()
     data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
-    # data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+    data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
