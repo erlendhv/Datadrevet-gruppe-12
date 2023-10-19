@@ -30,7 +30,7 @@ class data_modeling:
 
         # RANDOM FOREST
     def random_forest(self, X_train, y_train, X_test, y_test, tune = False):
-        rf_classifier = RandomForestClassifier(max_depth=9, max_features=5, min_samples_leaf=1, n_estimators=400, random_state=42)
+        rf_classifier = RandomForestClassifier(max_depth=17, max_features=3, min_samples_leaf=2, n_estimators=300, random_state=42)
 
         rf_classifier.fit(X_train, y_train)
         # prediction
@@ -114,5 +114,5 @@ if __name__ == '__main__':
     print("Happy data preprocessing and modeling!")
 
     data_modeling = data_modeling()
-    data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test, True)
+    data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
     # data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
