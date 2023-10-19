@@ -286,7 +286,7 @@ if __name__ == '__main__':
     # - may not be neccessary with pca or other data transformation/dimension reduction
     # - can do hyperparameter tuning using GridSearchCV
     # print(feature_extraction(data, True))
-    best_features = select_n_best(21, data)
+    best_features = select_n_best(26, data)
     for feature in data.columns:
         if feature not in best_features and feature != 'Target_Graduate':
             data.drop(feature, axis=1, inplace=True)
