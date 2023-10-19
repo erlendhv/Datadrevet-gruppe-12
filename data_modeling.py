@@ -80,8 +80,8 @@ class data_modeling:
 
         param_grid = {'C': [0.001, 0.01, 0.1, 1, 10, 100], 
             'gamma': [10, 1, 0.5, 0.1, 0.01, 0.001, 0.0001], 
-            'kernel': ['rbf', 'poly', 'linear', 'sigmoid']} if tune else {'C': [10], 
-                    'gamma': [0.01], 
+            'kernel': ['rbf', 'poly', 'linear', 'sigmoid']} if tune else {'C': [100], 
+                    'gamma': [0.001], 
                     'kernel': ['rbf']} 
 
 
