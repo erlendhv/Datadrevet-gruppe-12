@@ -10,11 +10,11 @@ from sklearn.model_selection import train_test_split
 """
 preprocessing
 """
-data = pd.read_csv('graduation_dataset.csv')
+data = pd.read_csv('graduation_dataset_preprocessed.csv')
 # one hot encode target column
-data = pd.get_dummies(data, columns=['Target'])
+# data = pd.get_dummies(data, columns=['Target_Graduate'])
 # drop colmuns that are not relevant, only look at graduate or not
-data = data.drop(columns=['Target_Enrolled','Target_Dropout'], axis=1)
+# data = data.drop(columns=['Target_Enrolled','Target_Dropout'], axis=1)
 #data = pd.get_dummies(data, columns=['Course'])
 # print(data.head())
 # print(data.describe())
@@ -167,34 +167,8 @@ feature selection: wrapper methods
 - probably not feasible as it takes too much computational power
 - have not finished the methods
 """
-# feature selection using Exhaustive Feature Selection. Perhaps not feasible to use wrapper methods as they use a lot of time
-from mlxtend.feature_selection import ExhaustiveFeatureSelector as EFS
-from sklearn.linear_model import LogisticRegression
-def efs(x,y):
-    lr = LogisticRegression()
-    efs = EFS(estimator=lr,
-            min_features=1,
-            max_features=5,
-            scoring='accuracy',
-            cv=5)
-    efs = efs.fit(x,y)
-    # Print the results
-    print('Best accuracy score: %.2f' % efs.best_score_) # best_score_ shows the best score 
-    print('Best subset (indices):', efs.best_idx_)       # best_idx_ shows the index of features that yield the best score 
-    print('Best subset (corresponding names):', efs.best_feature_names_) # best_feature_names_ shows the feature names 
-                                                                     # that yield the best score
 
 
-# sequential backward selection for selecting features
-from mlxtend.feature_selection import SequentialFeatureSelector as SFS
-def sbs(x,y):
-    lr = LogisticRegression()
-    sbs = SFS(estimator=lr, k_features=(1,15), forward=False, scoring='accuracy', cv=10)
-    sbs = sbs.fit(x,y)
-    # Print the results
-    print('Best accuracy score: %.2f' % sbs.k_score_)   # k_score_ shows the best score 
-    print('Best subset (indices):', sbs.k_feature_idx_) # k_feature_idx_ shows the index of features that yield the best score
-    print('Best subset (corresponding names):', sbs.k_feature_names_) # k_feature_names_ shows the feature names that yield the best score
 
 """
 feature selection: embedded methods
@@ -226,6 +200,7 @@ def rf_sel(X, y):
     return X_important_train, X_important_test
 
 from sklearn.metrics import accuracy_score
+
 if __name__ == '__main__':
 
     # heatmap(data)
@@ -244,13 +219,13 @@ if __name__ == '__main__':
     # using pca
     # pca2 = pca(data=data, plot=True, n_components=2)
     # pca21 = pca(data=data, plot=True, n_components=21)
-    #best_model = hyperparameter_tuning_pca_rf(X_train, X_test, y_train, y_test)
+    # best_model = hyperparameter_tuning_pca_rf(X_train, X_test, y_train, y_test)
 
     # 
     # comparing select k best, rf with pca, feature selction with random forest and just the full dataset
     # on random forest to see how it impacts accuracy score
     # 
-
+    """
     sel_columns = select_n_best(17, data)
     print('The most important features based on Select_K_Best:')
     for feature in sel_columns:
@@ -259,19 +234,19 @@ if __name__ == '__main__':
     x_sel_train, x_sel_test = X_train[[column for column in sel_columns]], X_test[[column for column in sel_columns]]
 
     X_important_train, X_important_test = rf_sel(X_train,y_train)
-
-     # try out optimal hyperparameters from best_model on pca and rf
+    
+    # try out optimal hyperparameters from best_model on pca and rf
     # 
     # Standardize the data 
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     # initiate pca with optimal number of components
-    pca = PCA(n_components=10)
+    pca = PCA(n_components=25)
     X_train_pca = pca.fit_transform(X_train_scaled)
     X_test_pca = pca.transform(X_test_scaled)
     # initate random forest with optimal depth and estimators
-    rf = RandomForestClassifier(max_depth=20, n_estimators=100)
+    rf = RandomForestClassifier(max_depth=20, n_estimators=200)
     rf.fit(X_train_pca, y_train)
     # Evaluate the model
     accuracy = rf.score(X_test_pca, y_test)
@@ -303,12 +278,21 @@ if __name__ == '__main__':
     pred_sel = rfc_sel.predict(x_sel_test)
     # Generate accuracy score
     print('The accuracy of classifier with features selected with select k best: {:.2f}'.format(accuracy_score(y_test, pred_sel)))
-
-    # 
+    """
     # Notes:
     
     # - should balance out data when using decision trees, biased to imbalance
     # - bagging and boosting can improve performance, ensemble learning (advanced models?)
     # - may not be neccessary with pca or other data transformation/dimension reduction
     # - can do hyperparameter tuning using GridSearchCV
-    # 
+    # print(feature_extraction(data, True))
+    best_features = select_n_best(21, data)
+    for feature in data.columns:
+        if feature not in best_features and feature != 'Target_Graduate':
+            data.drop(feature, axis=1, inplace=True)
+    
+    kolonne = data.pop('Target_Graduate')
+    data.insert(len(data.columns), 'Target_Graduate', kolonne)
+    
+    data.to_csv('graduation_dataset_preprocessed_feature_selected.csv', index=False)
+
