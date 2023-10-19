@@ -10,6 +10,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
+from sklearn.tree import export_graphviz
+from IPython.display import Image
+import graphviz
+from sklearn.model_selection import RandomizedSearchCV, train_test_split
+from scipy.stats import randint
 
 class data_modeling:
 
@@ -45,6 +50,28 @@ class data_modeling:
         print("Confusion Matrix:\n", confusion)
         print("Classification Report:\n", report)
 
+        param_dist = {'n_estimators': randint(50,500),
+              'max_depth': randint(1,20)}
+
+        # Create a random forest classifier
+        rf = RandomForestClassifier()
+
+        # Use random search to find the best hyperparameters
+        rand_search = RandomizedSearchCV(rf_classifier, 
+                                        param_distributions = param_dist, 
+                                        n_iter=5, 
+                                        cv=5)
+
+        # Fit the random search object to the data
+        rand_search.fit(X_train, y_train)
+        # Create a variable for the best model
+        best_rf = rand_search.best_estimator_
+
+        # Print the best hyperparameters
+        print('Best hyperparameters:',  rand_search.best_params_)
+        print('Best model:', best_rf)
+
+
 
     def rf_on_best_features(self, X_train, y_train, X_test, y_test, data):
         sel_cols = SelectKBest(mutual_info_classif, k=10)
@@ -69,36 +96,6 @@ class data_modeling:
         print("Classification Report:\n", report)
 
 
-
-    def rf_on_pca(self, data):
-        # Standardize the data
-        scaler = StandardScaler()
-        scaled_data = scaler.fit_transform(data)
-
-        # Initialize PCA with the number of components you want to retain
-        n_components = 2  # You can adjust this based on your needs
-        pca = PCA(n_components=n_components)
-
-        # Fit PCA to the standardized data
-        pca_result = pca.fit_transform(scaled_data)
-        X_train, X_test, y_train, y_test = train_test_split(pca_result, data["Target"], test_size=0.2, random_state=42)
-
-        rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
-        rf_classifier.fit(X_train, y_train)
-
-        y_pred = rf_classifier.predict(X_test)
-
-        # Evaluate the model
-        accuracy = accuracy_score(y_test, y_pred)
-        confusion = confusion_matrix(y_test, y_pred)
-        report = classification_report(y_test, y_pred)
-
-        print("Accuracy:", accuracy)
-        print("Confusion Matrix:\n", confusion)
-        print("Classification Report:\n", report)
-
-
-
     # RANDOM FOREST ON T-SNE data
 
     def rf_on_tsne(self, data):
@@ -114,7 +111,7 @@ class data_modeling:
 
         X_train, X_test, y_train, y_test = train_test_split(X_tsne, data["Target"], test_size=0.2, random_state=42)
 
-        rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+        rf_classifier = RandomForestClassifier(n_estimators=500, random_state=42, max_depth=17)
         rf_classifier.fit(X_train, y_train)
 
         y_pred = rf_classifier.predict(X_test)
@@ -128,6 +125,27 @@ class data_modeling:
         print("Confusion Matrix:\n", confusion)
         print("Classification Report:\n", report)
 
+        param_dist = {'n_estimators': randint(50,500),
+              'max_depth': randint(1,20)}
+
+        # Create a random forest classifier
+        rf = RandomForestClassifier()
+
+        # Use random search to find the best hyperparameters
+        rand_search = RandomizedSearchCV(rf_classifier, 
+                                        param_distributions = param_dist, 
+                                        n_iter=5, 
+                                        cv=5)
+
+        # Fit the random search object to the data
+        rand_search.fit(X_train, y_train)
+        # Create a variable for the best model
+        best_rf = rand_search.best_estimator_
+
+        # Print the best hyperparameters
+        print('Best hyperparameters:',  rand_search.best_params_)
+        print('Best model:', best_rf)
+
 
 
 
@@ -137,3 +155,8 @@ if __name__ == '__main__':
     # rf_on_pca()
     # rf_on_best_features()
     # random_forest(X_train, y_train, X_test, y_test)
+    data_modeling = data_modeling()
+    # data_modeling.rf_on_best_features(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test, data_modeling.data)
+    # data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+    # data_modeling.rf_on_tsne(data_modeling.data)
+    data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
