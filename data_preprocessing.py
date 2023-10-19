@@ -3,6 +3,7 @@ import pandas as pd
 from ast import If
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.manifold import TSNE
@@ -15,16 +16,20 @@ class Preprocessing:
     def __init__(self) -> None:
         # Load your dataset
         self.data = pd.read_csv("graduation_dataset.csv")  # Replace with your dataset file path
-        # one hot encoding target column to numeric values
-        target_mapping = {
-            "Dropout": 0,
-            "Enrolled": 0, 
-            "Graduate": 1
-        }
-        self.data.replace({"Target": target_mapping}, inplace=True)
+
         # Split the data into test and train
         self.X_train, self.X_test, self.y_train, self.y_test = self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target']],self.data['Target'], test_size=0.25, random_state=1)
 
+    def one_hot_encoding(self):
+        self.data = pd.get_dummies(self.data, columns=['Target']) 
+        self.data = self.data.astype(int) #endrer true og false til 1 og 0
+        self.data.drop('Target_Enrolled', inplace=True, axis=1)
+        self.data.drop('Target_Dropout', inplace=True, axis=1)
+        
+    def standarize(self):
+        scaler = MinMaxScaler()
+        self.data.iloc[:, :] = scaler.fit_transform(self.data.iloc[:, :])    
+        
     def describe(self):
         print(self.data.head())
         print(self.data.describe())
@@ -94,38 +99,9 @@ class Preprocessing:
         return pca_result
 
 
-# def kernel_pca():
-#     # Standardize the data
-#     scaler = StandardScaler()
-#     scaled_data = scaler.fit_transform(data)
-#     # initialize the Kernel PCA object
-#     Kernel_pca = KernelPCA(n_components = 2, kernel= "rbf")# extracts 2 features, specify the kernel as rbf
-#     # transform and fit the feature of the training set
-#     pca_result = Kernel_pca.fit_transform(scaled_data)
-#     X_train, X_test, y_train, y_test = train_test_split(pca_result, data["Target"], test_size=0.2, random_state=42)
-#     # transform features of the test set
-#     XTest = Kernel_pca.transform(X_test)
-    
-#     rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
-#     rf_classifier.fit(X_train, y_train)
-
-#     y_pred = rf_classifier.predict(XTest)
-
-#     # Evaluate the model
-#     accuracy = accuracy_score(y_test, y_pred)
-#     confusion = confusion_matrix(y_test, y_pred)
-#     report = classification_report(y_test, y_pred)
-
-#     print("Accuracy:", accuracy)
-#     print("Confusion Matrix:\n", confusion)
-#     print("Classification Report:\n", report)
-
-
-
-
-
-
 if __name__ == "__main__":
     print("Happy data preprocessing and modeling!")
     preprocessing = Preprocessing()
-    t_sne = preprocessing.pca(plot=True, n_components=5)
+    preprocessing.one_hot_encoding()
+    preprocessing.standarize()
+    preprocessing.data.to_csv("graduation_dataset_preprocessed.csv")
