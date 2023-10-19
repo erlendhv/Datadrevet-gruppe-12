@@ -1,43 +1,37 @@
 import numpy as np
 import pandas as pd
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
-from sklearn.feature_selection import mutual_info_classif, SelectKBest
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-
-from sklearn.tree import export_graphviz
-from IPython.display import Image
-import graphviz
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV, train_test_split
 from scipy.stats import randint
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.svm import SVC
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.preprocessing import StandardScaler
 
 class data_modeling:
 
     def __init__(self) -> None:
         # Load your dataset
-        self.data = pd.read_csv("Datadrevet-gruppe-12/graduation_dataset.csv")  # Replace with your dataset file path
-        # one hot encoding target column to numeric values
-        target_mapping = {
-            "Dropout": 0,
-            "Enrolled": 0, 
-            "Graduate": 1
-        }
-
-        self.data.replace({"Target": target_mapping}, inplace=True)
+        self.data = pd.read_csv("graduation_dataset_preprocessed_feature_selected.csv")  # Replace with your dataset file path
 
         # Split the data into test and train
-        self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target']],
-        self.data['Target'], test_size=0.25, random_state=1)
+        self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],
+        self.data['Target_Graduate'], test_size=0.25, random_state=1)
 
 
         # RANDOM FOREST
     def random_forest(self, X_train, y_train, X_test, y_test):
-        rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+        rf_classifier = RandomForestClassifier(max_depth=9, max_features=5, min_samples_leaf=1, n_estimators=400, random_state=42)
+
         rf_classifier.fit(X_train, y_train)
         # prediction
         y_pred = rf_classifier.predict(X_test)
@@ -50,113 +44,79 @@ class data_modeling:
         print("Confusion Matrix:\n", confusion)
         print("Classification Report:\n", report)
 
-        param_dist = {'n_estimators': randint(50,500),
-              'max_depth': randint(1,20)}
+        param_grid = {'n_estimators': [100, 200, 300, 400, 500],
+              'max_depth': [5, 9, 13, 17], 
+              'min_samples_leaf': [1, 2, 4, 6, 8],
+              'max_features': [3, 5, 7, 9, 11, 13]}
+        
+        # grid = GridSearchCV(SVC(), param_dist, refit=True, verbose=1, cv=5)
+        # grid.fit(X_train, y_train)
 
-        # Create a random forest classifier
-        rf = RandomForestClassifier()
+        # best_params = grid.best_params_
+        # print(f"Best params: {best_params}")
 
-        # Use random search to find the best hyperparameters
-        rand_search = RandomizedSearchCV(rf_classifier, 
-                                        param_distributions = param_dist, 
-                                        n_iter=5, 
-                                        cv=5)
-
-        # Fit the random search object to the data
-        rand_search.fit(X_train, y_train)
-        # Create a variable for the best model
-        best_rf = rand_search.best_estimator_
-
-        # Print the best hyperparameters
-        print('Best hyperparameters:',  rand_search.best_params_)
-        print('Best model:', best_rf)
-
-
-
-    def rf_on_best_features(self, X_train, y_train, X_test, y_test, data):
-        sel_cols = SelectKBest(mutual_info_classif, k=10)
-        sel_cols.fit(X_train, y_train)
-        X_train.columns[sel_cols.get_support()]
-        print(X_train.columns[sel_cols.get_support()])
-
-        X_train_new, X_test, y_train_new, y_test = train_test_split(data[X_train.columns[sel_cols.get_support()]], data["Target"], test_size=0.2, random_state=42)
-
-        rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
-        rf_classifier.fit(X_train_new, y_train_new)
-
-        y_pred = rf_classifier.predict(X_test)
-
-        # Evaluate the model
-        accuracy = accuracy_score(y_test, y_pred)
-        confusion = confusion_matrix(y_test, y_pred)
-        report = classification_report(y_test, y_pred)
-
-        print("Accuracy:", accuracy)
-        print("Confusion Matrix:\n", confusion)
-        print("Classification Report:\n", report)
-
-
-    # RANDOM FOREST ON T-SNE data
-
-    def rf_on_tsne(self, data):
-        scaler = StandardScaler()
-        scaled_data = scaler.fit_transform(data)
-
-        #T-SNE
-        # Initialize t-SNE
-        tsne = TSNE(n_components=2, random_state=42)
-
-        # Fit and transform the data
-        X_tsne = tsne.fit_transform(scaled_data)
-
-        X_train, X_test, y_train, y_test = train_test_split(X_tsne, data["Target"], test_size=0.2, random_state=42)
-
-        rf_classifier = RandomForestClassifier(n_estimators=500, random_state=42, max_depth=17)
-        rf_classifier.fit(X_train, y_train)
-
-        y_pred = rf_classifier.predict(X_test)
-
-        # Evaluate the model
-        accuracy = accuracy_score(y_test, y_pred)
-        confusion = confusion_matrix(y_test, y_pred)
-        report = classification_report(y_test, y_pred)
-
-        print("Accuracy:", accuracy)
-        print("Confusion Matrix:\n", confusion)
-        print("Classification Report:\n", report)
-
-        param_dist = {'n_estimators': randint(50,500),
-              'max_depth': randint(1,20)}
-
-        # Create a random forest classifier
-        rf = RandomForestClassifier()
-
-        # Use random search to find the best hyperparameters
-        rand_search = RandomizedSearchCV(rf_classifier, 
-                                        param_distributions = param_dist, 
-                                        n_iter=5, 
-                                        cv=5)
+        # Create a based model
+        rf = RandomForestRegressor()
+        # Instantiate the grid search model
+        grid_search = GridSearchCV(estimator = rf, param_grid = param_grid, 
+                                cv = 3, n_jobs = -1, verbose = 2)
 
         # Fit the random search object to the data
-        rand_search.fit(X_train, y_train)
+        grid_search.fit(X_train, y_train)
         # Create a variable for the best model
-        best_rf = rand_search.best_estimator_
+        best_rf = grid_search.best_estimator_
 
         # Print the best hyperparameters
-        print('Best hyperparameters:',  rand_search.best_params_)
+        print('Best hyperparameters:',  grid_search.best_params_)
         print('Best model:', best_rf)
 
+    #This code is based on the svm code found at https://analyticsindiamag.com/understanding-the-basics-of-svm-with-example-and-python-implementation/
+    def svm(self, X_train, Y_train, X_test, Y_test):
+        # # Split the data into training and test sets
+        training_set, test_set = train_test_split(self.data, test_size=0.25, random_state=1)
 
+        #standardize data
+        sc = StandardScaler()
+        X_train = sc.fit_transform(X_train)
+        X_test = sc.transform(X_test)
+
+        #Hyperparameter tuning, from https://www.kaggle.com/code/faressayah/support-vector-machine-pca-tutorial-for-beginner
+        param_grid = {'C': [10], 
+                    'gamma': [0.01], 
+                    'kernel': ['rbf']} 
+
+        #param_grid = {'C': [0.01, 0.1], 
+        #              'gamma': [1, 0.75], 
+        #              'kernel': ['poly', 'linear']} 
+
+        grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=1, cv=5)
+        grid.fit(X_train, Y_train)
+
+        best_params = grid.best_params_
+        print(f"Best params: {best_params}")
+
+        # Encode the class labels
+        le = LabelEncoder()
+        Y_train = le.fit_transform(Y_train)
+
+        # Train the SVM classifier
+        classifier = SVC(**best_params)
+        classifier.fit(X_train, Y_train)
+
+        # Predict on the test set
+        Y_pred = classifier.predict(X_test)
+        test_set["Predictions"] = Y_pred
+            
+        print(classification_report(Y_test, Y_pred))
+        # Calculate accuracy
+        cm = confusion_matrix(list(Y_test), Y_pred)
+        accuracy = float(np.diagonal(cm).sum()) / len(Y_test)
+        print("\nAccuracy Of SVM For The Given Dataset: ", accuracy)
 
 
 if __name__ == '__main__':
     print("Happy data preprocessing and modeling!")
-    # rf_on_tsne()
-    # rf_on_pca()
-    # rf_on_best_features()
-    # random_forest(X_train, y_train, X_test, y_test)
+
     data_modeling = data_modeling()
-    # data_modeling.rf_on_best_features(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test, data_modeling.data)
-    # data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
-    # data_modeling.rf_on_tsne(data_modeling.data)
     data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+    # data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
