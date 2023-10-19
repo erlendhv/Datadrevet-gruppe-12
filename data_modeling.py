@@ -78,14 +78,14 @@ class data_modeling:
         
         #Hyperparameter tuning, from https://www.kaggle.com/code/faressayah/support-vector-machine-pca-tutorial-for-beginner
 
-        param_grid = {'C': [0.01, 0.1, 0.5, 1, 10, 100], 
-            'gamma': [1, 0.75, 0.5, 0.25, 0.1, 0.01, 0.001], 
-            'kernel': ['rbf', 'poly', 'linear']} if tune else {'C': [10], 
+        param_grid = {'C': [0.001, 0.01, 0.1, 1, 10, 100], 
+            'gamma': [10, 1, 0.5, 0.1, 0.01, 0.001, 0.0001], 
+            'kernel': ['rbf', 'poly', 'linear', 'sigmoid']} if tune else {'C': [10], 
                     'gamma': [0.01], 
                     'kernel': ['rbf']} 
 
 
-        grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=1, cv=5)
+        grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=1, cv=5, n_jobs=-1)
         grid.fit(X_train, Y_train)
 
         best_params = grid.best_params_
