@@ -42,7 +42,7 @@ To get started with using this dataset and the Python methods for data preproces
 
 1. Clone or download this repository to your local machine.
 
-2. Open the Python files (`data_preprocessing.py` and `data_modeling.py`).
+2. Open the Python files (`data_preprocessing.py`, `features.py`, and `data_modeling.py`).
 
 3. Follow the instructions and code within the notebooks to explore, preprocess, and model the data.
 
