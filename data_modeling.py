@@ -36,9 +36,6 @@ class data_modeling:
         # prediction
         y_pred = rf_classifier.predict(X_test)
 
-        self.metrics("Random Forrest Classifier", y_test, y_pred)
-
-
         if tune:
             param_grid = {'n_estimators': [100, 200, 300, 400, 500],
                 'max_depth': [5, 9, 13, 17], 
@@ -60,6 +57,8 @@ class data_modeling:
             print('Best hyperparameters:',  grid_search.best_params_)
             print('Best model:', best_rf)
 
+        self.metrics("Random Forest Classifier", y_test, y_pred)
+
     #This code is based on the svm code found at https://analyticsindiamag.com/understanding-the-basics-of-svm-with-example-and-python-implementation/
     def svm(self, X_train, Y_train, X_test, Y_test, tune = False):
         # # Split the data into training and test sets
@@ -71,6 +70,9 @@ class data_modeling:
         X_test = sc.transform(X_test)
         
         #Hyperparameter tuning, from https://www.kaggle.com/code/faressayah/support-vector-machine-pca-tutorial-for-beginner
+
+        print("\n---------")
+        print("\nHyperparameter tuning for SVM:\n")
 
         param_grid = {'C': [0.001, 0.01, 0.1, 1, 10, 100], 
             'gamma': [10, 1, 0.5, 0.1, 0.01, 0.001, 0.0001], 
@@ -126,4 +128,4 @@ if __name__ == '__main__':
 
     data_modeling = data_modeling()
     data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
-    # data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+    data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
