@@ -31,7 +31,7 @@ class data_modeling:
 
 
         # RANDOM FOREST
-    def random_forest(self, X_train, y_train, X_test, y_test, tune = False):
+    def random_forest(self, X_train, y_train, X_test, y_test, tune = False, learning_curve = False):
         rf_classifier = RandomForestClassifier(max_depth=17, max_features=3, min_samples_leaf=2, n_estimators=300, random_state=42)
 
         rf_classifier.fit(X_train, y_train)
@@ -62,14 +62,15 @@ class data_modeling:
             print('Best hyperparameters:',  grid_search.best_params_)
             print('Best model:', best_rf)
         
-        cv = 5
-        title = "Learning Curves (Random Forest)"
-        plot_learning_curve(rf_classifier, title, X_train, y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
-        plt.show()
+        if learning_curve:
+            cv = 5
+            title = "Learning Curves (Random Forest)"
+            plot_learning_curve(rf_classifier, title, X_train, y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
+            plt.show()
 
 
     #This code is based on the svm code found at https://analyticsindiamag.com/understanding-the-basics-of-svm-with-example-and-python-implementation/
-    def svm(self, X_train, Y_train, X_test, Y_test, tune = False):
+    def svm(self, X_train, Y_train, X_test, Y_test, tune = False, learning_curve = False):
         # # Split the data into training and test sets
         training_set, test_set = train_test_split(self.data, test_size=0.25, random_state=1)
 
@@ -107,10 +108,11 @@ class data_modeling:
             
         self.metrics("SVM", Y_test, Y_pred)
 
-        cv = 5
-        title = "Learning Curves (SVM)"
-        plot_learning_curve(classifier, title, X_train, Y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
-        plt.show()
+        if learning_curve:
+            cv = 5
+            title = "Learning Curves (SVM)"
+            plot_learning_curve(classifier, title, X_train, Y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
+            plt.show()
 
 
     def metrics(self, modelStr, Y_test, Y_pred):
