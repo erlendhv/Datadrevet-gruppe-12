@@ -7,19 +7,16 @@ from sklearn.manifold import TSNE
 from sklearn.feature_selection import mutual_info_classif, SelectKBest, chi2
 from sklearn.model_selection import train_test_split
 
-"""
-preprocessing
-"""
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import SelectFromModel
+from sklearn.decomposition import PCA
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
+
+
 data = pd.read_csv('graduation_dataset_preprocessed.csv')
-# one hot encode target column
-# data = pd.get_dummies(data, columns=['Target_Graduate'])
-# drop colmuns that are not relevant, only look at graduate or not
-# data = data.drop(columns=['Target_Enrolled','Target_Dropout'], axis=1)
-#data = pd.get_dummies(data, columns=['Course'])
-# print(data.head())
-# print(data.describe())
-# check for NaN
-# print(nan_in_df = df.isnull().sum().any())
+
+
 """ 
 feature engineering: creating two new features
 have to do some extra preprocessing on the new features
@@ -95,7 +92,7 @@ def plot_t_sne( tsne):
     plt.ylabel('t-SNE Dimension 2')
     plt.show()
 
-from sklearn.decomposition import PCA
+
 # PCA. TODO: fit X_train and X_test and see effects
 def pca(data, plot=False, n_components=2):
     # Standardize the data
@@ -129,8 +126,6 @@ def pca(data, plot=False, n_components=2):
     # return pca_result
 
 
-from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import Pipeline
 # tune parameters for rf with pca
 def hyperparameter_tuning_pca_rf(X_train, X_test, y_train, y_test):
     # Define a pipeline
@@ -169,14 +164,11 @@ feature selection: wrapper methods
 """
 
 
-
 """
 feature selection: embedded methods
 should be done together with training
 """
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_selection import SelectFromModel
 # use random forest for selecting features
 def rf_sel(X, y):
     # gini criterion for feature importance
@@ -199,7 +191,17 @@ def rf_sel(X, y):
     X_important_test = sfm.transform(X_test)
     return X_important_train, X_important_test
 
-from sklearn.metrics import accuracy_score
+def select_best():
+    best_features = select_n_best(26, data)
+    for feature in data.columns:
+        if feature not in best_features and feature != 'Target_Graduate':
+            data.drop(feature, axis=1, inplace=True)
+    
+    kolonne = data.pop('Target_Graduate')
+    data.insert(len(data.columns), 'Target_Graduate', kolonne)
+    
+    data.to_csv('graduation_dataset_preprocessed_feature_selected.csv', index=False)
+
 
 if __name__ == '__main__':
 
@@ -286,13 +288,7 @@ if __name__ == '__main__':
     # - may not be neccessary with pca or other data transformation/dimension reduction
     # - can do hyperparameter tuning using GridSearchCV
     # print(feature_extraction(data, True))
-    best_features = select_n_best(26, data)
-    for feature in data.columns:
-        if feature not in best_features and feature != 'Target_Graduate':
-            data.drop(feature, axis=1, inplace=True)
-    
-    kolonne = data.pop('Target_Graduate')
-    data.insert(len(data.columns), 'Target_Graduate', kolonne)
-    
-    data.to_csv('graduation_dataset_preprocessed_feature_selected.csv', index=False)
+    select_best()
+
+
 
