@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pandas as pd
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -16,6 +17,7 @@ from sklearn.svm import SVC
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import learning_curve
 
 class data_modeling:
 
@@ -59,6 +61,38 @@ class data_modeling:
             # Print the best hyperparameters
             print('Best hyperparameters:',  grid_search.best_params_)
             print('Best model:', best_rf)
+        
+        cv = 5
+        title = "Learning Curves (Random Forest)"
+        plot_learning_curve(rf_classifier, title, X_train, y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
+        plt.show()
+
+    def rf_on_pca(self, data):
+        # Standardize the data
+        scaler = StandardScaler()
+        scaled_data = scaler.fit_transform(data)
+        # Initialize PCA with the number of components you want to retain
+        n_components = 2  # You can adjust this based on your needs
+        pca = PCA(n_components=n_components)
+        # Fit PCA to the standardized data
+        pca_result = pca.fit_transform(scaled_data)
+        X_train, X_test, y_train, y_test = train_test_split(pca_result, data["Target_Graduate"], test_size=0.2, random_state=42)
+        rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+        rf_classifier.fit(X_train, y_train)
+        y_pred = rf_classifier.predict(X_test)
+        # Evaluate the model
+        accuracy = accuracy_score(y_test, y_pred)
+        confusion = confusion_matrix(y_test, y_pred)
+        report = classification_report(y_test, y_pred)
+        print("Accuracy:", accuracy)
+        print("Confusion Matrix:\n", confusion)
+        print("Classification Report:\n", report)
+        cv = 5
+        title = "Learning Curves (Random Forest with PCA)"
+        plot_learning_curve(rf_classifier, title, X_train, y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
+        plt.show()
+
+
 
     #This code is based on the svm code found at https://analyticsindiamag.com/understanding-the-basics-of-svm-with-example-and-python-implementation/
     def svm(self, X_train, Y_train, X_test, Y_test, tune = False):
@@ -99,6 +133,12 @@ class data_modeling:
             
         self.metrics("SVM", Y_test, Y_pred)
 
+        cv = 5
+        title = "Learning Curves (SVM)"
+        plot_learning_curve(classifier, title, X_train, Y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
+        plt.show()
+
+
     def metrics(self, modelStr, Y_test, Y_pred):
 
         print("\n---------")
@@ -120,10 +160,39 @@ class data_modeling:
         # disp.plot()
         # plt.show()
 
+def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None, n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
+    plt.figure()
+    plt.title(title)
+    if ylim is not None:
+        plt.ylim(*ylim)
+    plt.xlabel("Training examples")
+    plt.ylabel("Score")
+    train_sizes, train_scores, test_scores = learning_curve(
+        estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+    plt.grid()
+    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+                    train_scores_mean + train_scores_std, alpha=0.1,
+                    color="r")
+    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+                    test_scores_mean + test_scores_std, alpha=0.1, color="g")
+    plt.plot(train_sizes, train_scores_mean, "o-", color="r",
+            label="Training score")
+    plt.plot(train_sizes, test_scores_mean, "o-", color="g",
+            label="Cross-validation score")
+    plt.legend(loc="best")
+    return plt
+
 
 if __name__ == '__main__':
     print("Happy data preprocessing and modeling!")
 
     data_modeling = data_modeling()
     data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
-    # data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+    data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+    # data_modeling.rf_on_pca(data_modeling.data)
+    # Finding the number of graduated and not graduated students
+    # print(data_modeling.data['Target_Graduate'].value_counts())
