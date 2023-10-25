@@ -1,8 +1,8 @@
 # Datadrevet-gruppe-12
 
-# Student Enrollment and Academic Performance Dataset
+## Student Enrollment and Academic Performance Dataset
 
-## Overview
+### Overview
 
 This GitHub repository contains a comprehensive dataset providing detailed information about students' enrollment in various courses, their personal characteristics, academic performance, and economic indicators. This dataset is a valuable resource for data preprocessing and modeling techniques using Python.
 
@@ -24,29 +24,37 @@ The dataset encompasses a wide range of fields, including:
 
 ### Repository Contents
 
-This repository contains the following files and folders:
+This repository contains the following Python classes and files:
 
-- **`graduation_dataset.csv`**: The dataset file in CSV format containing all the student enrollment and academic performance data.
+- **.gitignore**: A file specifying which files and directories to exclude from version control.
 
-- **`data_preprocessing.py`**: A Jupyter Notebook that demonstrates Python methods for data preprocessing on the dataset. It includes steps for cleaning, handling missing data, encoding categorical variables, and performing feature engineering.
+- **LICENSE**: The license information for using the dataset and code in this repository.
 
-- **`data_modeling.py`**: Another Jupyter Notebook that showcases various data modeling techniques using Python. It covers tasks such as exploratory data analysis, feature selection, and model building. You'll find examples of regression, classification, or any other relevant modeling techniques.
+- **README.md**: This readme file, providing an overview of the dataset and instructions for using the repository.
 
-- **`LICENSE`**: The license information for using the dataset and code in this repository.
+- **data_modeling.py**: A Python file that contains a class that showcases various data modeling techniques using Python. It contains two basic modeling techniques, Support Vector Machine (SVM), and Random Forest Classifier (RFC). It runs on the "graduation_dataset_preprocessed_feature_selected.csv", that has been preprocessed, and feature selected and extracted. 
 
-- **`README.md`**: This readme file, providing an overview of the dataset and instructions for using the repository.
+- **data_preprocessing.py**: Another Python file containing a class that demonstrates Python methods for data preprocessing on the dataset. It one-hot encodes the target column. It also contains various methods for visualizing the data. It truns on the "graduation_dataset.csv", that we got from the source. 
+
+- **features.py**: A Python file that performed feature selection and extraction. It runs on the "graduation_dataset_preprocessed.csv", that has been preprocessed. 
+
+- **graduation_dataset.csv**: The dataset file in CSV format containing all the student enrollment and academic performance data. This is the dataset we got from the source. 
+
+- **graduation_dataset_preprocessed.csv**: An additional dataset file that has undergone preprocessing.
+
+- **graduation_dataset_preprocessed_feature_selected.csv**: An additional dataset file that has undergone both preprocessing and feature selection.
 
 ### Usage
 
-To get started with using this dataset and the Python methods for data preprocessing and modeling, follow these steps:
+To get started with using this dataset and the Python classes for data preprocessing and modeling, follow these steps:
 
 1. Clone or download this repository to your local machine.
 
-2. Open the Python files (`data_preprocessing.py`, `features.py`, and `data_modeling.py`).
+2. Open the Python classes (data_preprocessing.py, data_modeling.py, and features.py).
 
-3. Follow the instructions and code within the notebooks to explore, preprocess, and model the data.
+3. Follow the instructions and code within the classes and files to explore, preprocess, and model the data. In data_modeling.py, you can uncomment the methods you want to run in the main method at the bottom. 
 
-4. You can use the provided dataset (`graduation_dataset.csv`) or replace it with your own data, making sure it follows a similar structure.
+4. You can use the provided dataset (graduation_dataset.csv) or replace it with your own data, making sure it follows a similar structure.
 
 ### Citation
 
@@ -56,6 +64,6 @@ If you use this dataset or find the provided code and techniques useful for your
 
 We would like to express our gratitude to the contributors and organizations that made this dataset available for research and analysis.
 
-For any questions, issues, or suggestions related to this repository, please feel free to [create an issue](https://github.com/erlendhv/Datadrevet-gruppe-12/issues) or contact the repository owner.
+For any questions, issues, or suggestions related to this repository, please feel free to create an issue or contact the repository owner.
 
-Happy data preprocessing and modeling!
+Happy data preprocessing and modeling! 
