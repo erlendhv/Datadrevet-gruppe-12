@@ -20,7 +20,7 @@ The dataset encompasses a wide range of fields, including:
 
 - **Economic Indicators**: Key economic indicators such as the unemployment rate, inflation rate, and GDP, which may offer insights into any correlations between economic conditions and academic outcomes.
 
-- **Target Variable**: The 'Target' column provides a focal point for analysis, indicating a variable of interest that researchers or analysts may seek to predict or understand better.
+- **Target Variable**: The 'Target' column is the focal point for analysis, indicating whether a student has graduated after normal time or not. 
 
 ### Repository Contents
 
