@@ -118,24 +118,36 @@ class data_modeling:
             title = "Learning Curves (SVM)"
             plot_learning_curve(classifier, title, X_train, Y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
             plt.show()
-    def mpl(self, X_train, Y_train, X_test, Y_test):
+   
+    def mpl(self, X_train, Y_train, X_test, Y_test,tune=False):
         #MLP for calssification of the dataset
         #using sklearn.neural_network.MLPClassifier
-        
-        #define the model
-        mlp = MLPClassifier(hidden_layer_sizes=(30,30,30))
-        #fit the model
-        mlp.fit(X_train,Y_train)
-        #predict the test set
+        parameter_space = {
+            'hidden_layer_sizes': [(50,50,50), (50,100,50), (100,)],
+            'alpha': [0.0001, 0.05],
+            'learning_rate': ['constant','adaptive'],
+        } if tune else {'learning_rate': ['constant']}
+
+
+        grid = GridSearchCV(MLPClassifier(max_iter=250), parameter_space, n_jobs=-1)
+        grid.fit(X_train, Y_train)
+
+        best_params = grid.best_params_
+        print(f"Best params: {best_params}")
+
+        # Train the SVM classifier
+        mlp = MLPClassifier(max_iter=10000)
+        mlp.fit(X_train, Y_train)
+
+        # #predict the test set
         predictions = mlp.predict(X_test)
-        #print the metrics
+        # #print the metrics
         self.metrics("MLP", Y_test, predictions)
-        #plot the learning curve
-        cv = 5
+        # #plot the learning curve
         title = "Learning Curves (MLP)"
-        plot_learning_curve(mlp, title, X_train, Y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
+        plot_learning_curve(mlp, title, X_train, Y_train, ylim=(0.7, 1.01), cv=5, n_jobs=4)
 
-
+   
     def metrics(self, modelStr, Y_test, Y_pred):
 
         print("\n---------")
@@ -189,4 +201,4 @@ if __name__ == '__main__':
     data_modeling = data_modeling()
     #data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
     #data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
-    data_modeling.mpl(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+    data_modeling.mpl(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test,True)
