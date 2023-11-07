@@ -32,11 +32,11 @@ class data_modeling:
 
         # RANDOM FOREST
     def random_forest(self, X_train, y_train, X_test, y_test, tune = False, learning_curve = False):
-        rf_classifier = RandomForestClassifier(max_depth=17, max_features=3, min_samples_leaf=2, n_estimators=300, random_state=42)
+        self.rf_classifier = RandomForestClassifier(max_depth=17, max_features=3, min_samples_leaf=2, n_estimators=300, random_state=42)
 
-        rf_classifier.fit(X_train, y_train)
+        self.rf_classifier.fit(X_train, y_train)
         # prediction
-        y_pred = rf_classifier.predict(X_test)
+        y_pred = self.rf_classifier.predict(X_test)
 
         if tune:
             param_grid = {'n_estimators': [100, 200, 300, 400, 500],
@@ -62,7 +62,7 @@ class data_modeling:
         if learning_curve:
             cv = 5
             title = "Learning Curves (Random Forest)"
-            plot_learning_curve(rf_classifier, title, X_train, y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
+            plot_learning_curve(self.rf_classifier, title, X_train, y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
             plt.show()
 
 
@@ -101,11 +101,11 @@ class data_modeling:
         Y_train = le.fit_transform(Y_train)
 
         # Train the SVM classifier
-        classifier = SVC(**best_params)
-        classifier.fit(X_train, Y_train)
+        self.classifier = SVC(**best_params)
+        self.classifier.fit(X_train, Y_train)
 
         # Predict on the test set
-        Y_pred = classifier.predict(X_test)
+        Y_pred = self.classifier.predict(X_test)
         test_set["Predictions"] = Y_pred
             
         self.metrics("SVM", Y_test, Y_pred)
@@ -113,7 +113,7 @@ class data_modeling:
         if learning_curve:
             cv = 5
             title = "Learning Curves (SVM)"
-            plot_learning_curve(classifier, title, X_train, Y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
+            plot_learning_curve(self.classifier, title, X_train, Y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
             plt.show()
 
 
