@@ -120,6 +120,7 @@ class data_modeling:
             plt.show()
    
     def mpl(self, X_train, Y_train, X_test, Y_test,tune=False):
+        maxIterations = 250
         #MLP for calssification of the dataset
         #using sklearn.neural_network.MLPClassifier
         parameter_space = {
@@ -129,14 +130,14 @@ class data_modeling:
         } if tune else {'learning_rate': ['constant']}
 
 
-        grid = GridSearchCV(MLPClassifier(max_iter=250), parameter_space, n_jobs=-1)
+        grid = GridSearchCV(MLPClassifier(max_iter=maxIterations), parameter_space, n_jobs=-1)
         grid.fit(X_train, Y_train)
 
         best_params = grid.best_params_
         print(f"Best params: {best_params}")
 
         # Train the SVM classifier
-        mlp = MLPClassifier(max_iter=10000)
+        mlp = MLPClassifier(max_iter=maxIterations, **best_params)
         mlp.fit(X_train, Y_train)
 
         # #predict the test set
