@@ -9,58 +9,46 @@ from sklearn.ensemble import RandomForestClassifier
 from data_modeling import plot_learning_curve
 import seaborn as sns
 
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.preprocessing import LabelEncoder
+
+
 
 # Load your dataset from the CSV file
-# real_data = pd.read_csv("graduation_dataset_preprocessed_feature_selected.csv")
-real_data = pd.read_csv("TEST_FINAL.csv")
+real_data = pd.read_csv("CTGAN_DATA.csv")
 real_data.drop(columns=['Unnamed: 0'], inplace=True)
 
 discrete_columns = [
-    "Marital status",
     "Application mode",
+    "Application order",
     "Course",
-    "Daytime/evening attendance",
-    "Previous qualification",
     "Father's qualification",
     "Mother's occupation",
     "Father's occupation",
+    "Displaced",
     "Debtor",
     "Tuition fees up to date",
     "Gender",
     "Scholarship holder",
-    "Age at enrollment",
-    "International",
-    "Curricular units 1st sem (enrolled)",
-    "Curricular units 1st sem (evaluations)",
-    "Curricular units 1st sem (approved)",
-    "Curricular units 1st sem (grade)",
-    "Curricular units 2nd sem (credited)",
-    "Curricular units 2nd sem (enrolled)",
-    "Curricular units 2nd sem (evaluations)",
-    "Curricular units 2nd sem (approved)",
-    "Curricular units 2nd sem (grade)",
-    "units_approved_rate_1st",
-    "units_approved_rate_2nd",
     "Target_Graduate"
 ]
+
 
 # Fit the CTGAN model to your data
 ctgan = CTGAN(verbose = True, epochs=1000, batch_size=500)
 # ctgan.fit(real_data)
 
-# ctgan = CTGAN().load('ctgan_30daysofml_model.pkl')
-ctgan = CTGAN().load('TEST.pkl')
+ctgan = CTGAN().load('CTGAN_MODEL.pkl')
 
 # Generate synthetic data
-num_samples = 4000  # You can change this value as needed
+num_samples = 4424  # You can change this value as needed
 synthetic_data = ctgan.sample(num_samples)
 
 # Save the synthetic data to a new CSV file
-# synthetic_data.to_csv('synthetic_data.csv', index=False)
-synthetic_data.to_csv('SYNTHETIC_TEST.csv', index=False)
+synthetic_data.to_csv('SYNTHETIC_CTGAN_DATA.csv', index=False)
 
-# ctgan.save('ctgan_30daysofml_model.pkl')
-# ctgan.save('TEST.pkl')
+# ctgan.save('CTGAN_MODEL.pkl')
 
 def training_loss():
     # Get the loss values from the ctgan training as a pd.dataframe with columns=['Epoch', 'Generator Loss', 'Distriminator Loss']
@@ -78,8 +66,7 @@ def training_loss():
 
 # training_loss()
     
-# gan_data = pd.read_csv("synthetic_data.csv")  
-gan_data = pd.read_csv("SYNTHETIC_TEST.csv")  
+gan_data = pd.read_csv("SYNTHETIC_CTGAN_DATA.csv")  
 
 # # Merge real and generated data
 data = pd.concat([real_data, gan_data])
@@ -145,9 +132,58 @@ def random_forest( X_train, y_train, X_test, y_test, tune = False, learning_curv
 
 
     metrics("Random Forest Classifier", y_test, y_pred)
+
+    #This code is based on the svm code found at https://analyticsindiamag.com/understanding-the-basics-of-svm-with-example-and-python-implementation/
+def svm(X_train, Y_train, X_test, Y_test, tune = False, learning_curve = False):
+    # # Split the data into training and test sets
+    # training_set, test_set = train_test_split(real_data, test_size=0.25, random_state=1)
+
+    #standardize data
+    sc = StandardScaler()
+    X_train = sc.fit_transform(X_train)
+    X_test = sc.transform(X_test)
+    
+    #Hyperparameter tuning, from https://www.kaggle.com/code/faressayah/support-vector-machine-pca-tutorial-for-beginner
+
+    print("\n---------")
+    print("\nHyperparameter tuning for SVM:\n")
+
+    param_grid = {'C': [0.001, 0.01, 0.1, 1, 10, 100], 
+        'gamma': [10, 1, 0.5, 0.1, 0.01, 0.001, 0.0001], 
+        'kernel': ['rbf', 'poly', 'linear', 'sigmoid']} if tune else {'C': [100], 
+                'gamma': [0.001], 
+                'kernel': ['rbf']} 
+
+
+    grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=1, cv=5, n_jobs=-1)
+    grid.fit(X_train, Y_train)
+
+    best_params = grid.best_params_
+    print(f"Best params: {best_params}")
+
+    # Encode the class labels
+    le = LabelEncoder()
+    Y_train = le.fit_transform(Y_train)
+
+    # Train the SVM classifier
+    classifier = SVC(**best_params)
+    classifier.fit(X_train, Y_train)
+
+    # Predict on the test set
+    Y_pred = classifier.predict(X_test)
+    # test_set["Predictions"] = Y_pred
         
+    metrics("SVM", Y_test, Y_pred)
+
+    if learning_curve:
+        cv = 5
+        title = "Learning Curves (SVM)"
+        plot_learning_curve(classifier, title, X_train, Y_train, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
+        plt.show()
+    
 
 random_forest(X_train, y_train, X_test, y_test)
+svm(X_train, y_train, X_test, y_test)
 
 
 # print(data.shape, synthetic_data.shape)
@@ -178,3 +214,6 @@ def corr():
     # show summary statistics SYNTHETIC DATA
     summary = synthetic_data.describe()
     print(summary)
+
+print(gan_data.describe())
+print(real_data.describe())
