@@ -26,7 +26,7 @@ class data_modeling:
 
     def __init__(self) -> None:
         # Load your dataset
-        self.data = pd.read_csv("graduation_dataset_preprocessed.csv")  # Replace with your dataset file path
+        self.data = pd.read_csv("tmp.csv")  # Replace with your dataset file path
 
         # Split the data into test and train
         self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],
@@ -128,5 +128,5 @@ if __name__ == '__main__':
     max_iterations=2000
     number_of_runs=2
 
-    runs=[data_modeling.mpl(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test,max_iterations,False) for i in range(number_of_runs)]
+    runs=[data_modeling.mpl(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test,max_iterations,True) for i in range(number_of_runs)]
     print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(runs)/number_of_runs}")

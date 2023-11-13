@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 import seaborn as sns
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.feature_selection import mutual_info_classif, SelectKBest
@@ -16,6 +16,18 @@ class Preprocessing:
     def __init__(self) -> None:
         # Load your dataset
         self.data = pd.read_csv("graduation_dataset.csv")  # Replace with your dataset file path
+
+    def one_hot_encode_all(self):
+
+        # oHEnc = OneHotEncoder()
+        # self.data = oHEnc.fit_transform(self.data)
+        # self.data = pd.DataFrame(self.data)
+
+        self.data = pd.get_dummies(self.data, columns=self.data.columns)
+        self.data = self.data.astype(int)
+        self.data.drop('Target_Enrolled', inplace=True, axis=1)
+        self.data.drop('Target_Dropout', inplace=True, axis=1)
+
 
     def one_hot_encoding(self):
         self.data = pd.get_dummies(self.data, columns=['Target']) 
@@ -99,6 +111,9 @@ class Preprocessing:
 if __name__ == "__main__":
     print("Happy data preprocessing and modeling!")
     preprocessing = Preprocessing()
-    preprocessing.one_hot_encoding()
+    # preprocessing.one_hot_encoding()
+    preprocessing.one_hot_encode_all()
+    # Standardization should only be done on train-set and thus not done here
     #preprocessing.standarize()
-    preprocessing.data.to_csv("graduation_dataset_preprocessed.csv")
+    # preprocessing.data.to_csv("graduation_dataset_preprocessed.csv")
+    preprocessing.data.to_csv("tmp.csv")
