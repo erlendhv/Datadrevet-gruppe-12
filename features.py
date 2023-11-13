@@ -289,6 +289,6 @@ if __name__ == '__main__':
     # - may not be neccessary with pca or other data transformation/dimension reduction
     # - can do hyperparameter tuning using GridSearchCV
     # print(feature_extraction(data, True))
-    select_best(12)
+    select_best(13)
 
 

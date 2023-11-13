@@ -12,8 +12,6 @@ plt.plot(x,y)
 plt.xticks(x)
 
 
-
-
 #mark y ticks every 0.01 and the max and min values aswell
 plt.yticks([i/100 for i in range(82,87)]+[0.825204,0.8672])
 #plot the points in blue
