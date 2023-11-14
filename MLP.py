@@ -126,7 +126,12 @@ if __name__ == '__main__':
 
     #getting avg accuracy
     max_iterations=2000
-    number_of_runs=2
+    number_of_runs=1
+    #start timer
+    import time
+    start_time = time.time()
 
     runs=[data_modeling.mpl(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test,max_iterations,True) for i in range(number_of_runs)]
     print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(runs)/number_of_runs}")
+#end timer
+    print("--- %s seconds ---" % (time.time() - start_time))
