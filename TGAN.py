@@ -19,6 +19,13 @@ from sklearn.preprocessing import LabelEncoder
 real_data = pd.read_csv("CTGAN_DATA.csv")
 real_data.drop(columns=['Unnamed: 0'], inplace=True)
 
+unusedX, X_test, unusedY, y_test =  train_test_split(real_data[real_data.columns[real_data.columns != 'Target_Graduate']],
+        real_data['Target_Graduate'], test_size=0.25, random_state=1)
+
+# Want to make a dataset from X_test and y_test
+# This is to be used by CTGAN to generate synthetic data
+data_without_test = pd.concat([unusedX, unusedY], axis=1)
+
 discrete_columns = [
     "Application mode",
     "Application order",
@@ -37,12 +44,12 @@ discrete_columns = [
 
 # Fit the CTGAN model to your data
 ctgan = CTGAN(verbose = True, epochs=1000, batch_size=500)
-# ctgan.fit(real_data)
+# ctgan.fit(real_data, discrete_columns)
 
 ctgan = CTGAN().load('CTGAN_MODEL.pkl')
 
 # Generate synthetic data
-num_samples = 4424  # You can change this value as needed
+num_samples = len(real_data)  # You can change this value as needed
 synthetic_data = ctgan.sample(num_samples)
 
 # Save the synthetic data to a new CSV file
@@ -68,15 +75,20 @@ def training_loss():
     
 gan_data = pd.read_csv("SYNTHETIC_CTGAN_DATA.csv")  
 
-# # Merge real and generated data
-data = pd.concat([real_data, gan_data])
+# Merge real and generated data
+data = pd.concat([data_without_test, gan_data])
+
+# Get X_train and y_train from data
+X_train = data[data.columns[data.columns != 'Target_Graduate']]
+y_train = data['Target_Graduate']
+
 
 # X_train, X_test, y_train, y_test =  train_test_split(data[data.columns[data.columns != 'Target_Graduate']],
 #         data['Target_Graduate'], test_size=0.25, random_state=1)
-X_train, unusedx, y_train, unusedy =  train_test_split(data[data.columns[data.columns != 'Target_Graduate']],
-        data['Target_Graduate'], test_size=0.25, random_state=1)
-unusedX, X_test, unusedY, y_test =  train_test_split(real_data[real_data.columns[real_data.columns != 'Target_Graduate']],
-        real_data['Target_Graduate'], test_size=0.25, random_state=1)
+# X_train, unusedx, y_train, unusedy =  train_test_split(data[data.columns[data.columns != 'Target_Graduate']],
+        # data['Target_Graduate'], test_size=0.25, random_state=1)
+# unusedX, X_test, unusedY, y_test =  train_test_split(real_data[real_data.columns[real_data.columns != 'Target_Graduate']],
+#         real_data['Target_Graduate'], test_size=0.25, random_state=1)
 
 def metrics( modelStr, Y_test, Y_pred):
 
@@ -182,8 +194,8 @@ def svm(X_train, Y_train, X_test, Y_test, tune = False, learning_curve = False):
         plt.show()
     
 
-random_forest(X_train, y_train, X_test, y_test)
-svm(X_train, y_train, X_test, y_test)
+random_forest(X_train, y_train, X_test, y_test, tune = False)
+svm(X_train, y_train, X_test, y_test, tune = False)
 
 
 # print(data.shape, synthetic_data.shape)
@@ -215,5 +227,7 @@ def corr():
     summary = synthetic_data.describe()
     print(summary)
 
+print("SYNTHETIC DATA")
 print(gan_data.describe())
+print("\nREAL DATA")
 print(real_data.describe())
