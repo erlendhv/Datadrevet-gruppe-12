@@ -38,7 +38,7 @@ class Ensemble:
         x = self.data.drop(['Target_Graduate'], axis=1)
         y = self.data['Target_Graduate']
         # using score function mutual information to capture complex relations
-        sel_k_best = SelectKBest(k=21, score_func=mutual_info_classif)
+        sel_k_best = SelectKBest(k=13, score_func=mutual_info_classif)
         features = sel_k_best.fit_transform(x,y)
         # print(dict(zip(x.columns, sel_k_best.scores_)))
         best_features = [x.columns[feature] for feature in sel_k_best.get_support(indices=True)]
@@ -184,29 +184,55 @@ class Ensemble:
             'penalty': ['l1', 'l2', 'elasticnet', None],
             # Add other meta-model hyperparameters as needed
         }
-
+        # final_estimator=LogisticRegression(C=0.01, penalty=None)
         self.grid_search_meta = GridSearchCV(estimator=meta_model, param_grid=param_grid_meta, cv=5, n_jobs=-1, verbose=1)
         self.grid_search_meta.fit(predictions_from_base_models, self.y_train)  # `predictions_from_base_models` is the combined output of base model
-        # Create and fit the stacking classifier
-        stacking_clf = StackingClassifier(estimators=self.tuned_base_models, final_estimator=self.grid_search_meta.best_estimator_, cv=5)
-        stacking_clf.fit(self.X_train, self.y_train)
+        """
+        param_grid_stacking = {
+            'cv': [5, 10, 15, StratifiedKFold(), 'prefit'],
+            'n_jobs': [-1],
+            'passthrough': [True, False],
+            'stack_method' : ['auto', 'predict_proba', 'decision_function', 'predict']
+        }
+        grid_search_stacking = GridSearchCV(estimator=StackingClassifier(estimators=self.tuned_base_models, final_estimator=self.grid_search_meta.best_estimator_), param_grid=param_grid_stacking, n_jobs=-1, verbose=2)
+        grid_search_stacking.fit(self.X_train, self.y_train)
+        print(grid_search_stacking.best_estimator_)
+        accuracy = grid_search_stacking.score(self.X_test, self.y_test)
+        print("Accuracy on Test Set:", accuracy)
+        """
+        rf_preds = []
+        svc_preds = []
+        xgb_preds = []
+        stack_preds = []
+        for _ in range(10):
+            # Create and fit the stacking classifier
+            stacking_clf = StackingClassifier(estimators=self.tuned_base_models, final_estimator=self.grid_search_meta.best_estimator_, cv=5, passthrough=False, stack_method='auto')
+            stacking_clf.fit(self.X_train, self.y_train)
 
-        # Make predictions
-        y_pred = stacking_clf.predict(self.X_test)
-        self.metrics("Stacking Classifier", self.y_test, y_pred)
+            # Make predictions
+            y_pred = stacking_clf.predict(self.X_test)
+            stack_preds.append(accuracy_score(y_true=self.y_test, y_pred=y_pred))
+            self.metrics("Stacking Classifier", self.y_test, y_pred)
 
-        rf = RandomForestClassifier(max_depth=9, max_features=3, n_estimators=300).fit(self.X_train, self.y_train)
-        rf_pred = rf.predict(self.X_test)
-        self.metrics('Random Forest', rf_pred, self.y_test)
+            rf = RandomForestClassifier(max_depth=9, max_features=3, n_estimators=300).fit(self.X_train, self.y_train)
+            rf_pred = rf.predict(self.X_test)
+            rf_preds.append(accuracy_score(y_true=self.y_test, y_pred=rf_pred))
+            self.metrics('Random Forest', rf_pred, self.y_test)
 
-        svm = SVC(C=10, gamma=0.01, kernel='rbf').fit(self.X_train_scaled, self.y_train)
-        svm_pred = svm.predict(self.X_test_scaled)
-        self.metrics('SVM', svm_pred, self.y_test)
+            svm = SVC(C=10, gamma=0.01, kernel='rbf').fit(self.X_train_scaled, self.y_train)
+            svm_pred = svm.predict(self.X_test_scaled)
+            svc_preds.append(accuracy_score(y_true=self.y_test, y_pred=svm_pred))
+            self.metrics('SVM', svm_pred, self.y_test)
 
-        xgb = XGBClassifier(colsample_bytree=1.0, gamma=0, learning_rate=0.1, max_depth=3, min_child_weight=5, n_estimators=300, scale_pos_weight=1, subsample=0.9).fit(self.X_train, self.y_train)
-        xgb_pred = xgb.predict(self.X_test)
-        self.metrics('XGBoost', xgb_pred, self.y_test)
+            xgb = XGBClassifier(colsample_bytree=1.0, gamma=0, learning_rate=0.1, max_depth=3, min_child_weight=5, n_estimators=300, scale_pos_weight=1, subsample=0.9).fit(self.X_train, self.y_train)
+            xgb_pred = xgb.predict(self.X_test)
+            xgb_preds.append(accuracy_score(y_true=self.y_test, y_pred=xgb_pred))
+            self.metrics('XGBoost', xgb_pred, self.y_test)
 
+        print('average for rf: ' + str(sum(rf_preds)/10))
+        print('average for svc: ' + str(sum(svc_preds)/10))
+        print('average for xgb: ' + str(sum(xgb_preds)/10))
+        print('average for stacking: ' + str(sum(stack_preds)/10))
         """
         Currently best: 0.87432188, using 13 or 15 features. XGBoost gets the same performance. Large variations each time. Stacking not consistently better
         """
