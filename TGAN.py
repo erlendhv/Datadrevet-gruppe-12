@@ -43,8 +43,8 @@ discrete_columns = [
 
 
 # Fit the CTGAN model to your data
-ctgan = CTGAN(verbose = True, epochs=1000, batch_size=500)
-# ctgan.fit(real_data, discrete_columns)
+ctgan = CTGAN(verbose = True, epochs=1000, batch_size=300, generator_dim=(256, 256, 256), discriminator_dim=(256, 256, 256))
+ctgan.fit(real_data, discrete_columns)
 
 ctgan = CTGAN().load('CTGAN_MODEL.pkl')
 
