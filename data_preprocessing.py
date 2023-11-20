@@ -16,6 +16,7 @@ class Preprocessing:
     def __init__(self) -> None:
         # Load your dataset
         self.data = pd.read_csv("graduation_dataset.csv")  # Replace with your dataset file path
+        self.X_train, self.X_test, self.y_train, self.y_test = self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target']],self.data['Target'], test_size=0.25, random_state=1)
 
     def one_hot_encoding(self):
         self.data = pd.get_dummies(self.data, columns=['Target']) 
