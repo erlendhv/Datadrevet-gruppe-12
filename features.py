@@ -191,8 +191,9 @@ def rf_sel(X, y):
     X_important_test = sfm.transform(X_test)
     return X_important_train, X_important_test
 
-def select_best():
-    best_features = select_n_best(26, data)
+def select_best(n=26):
+    data = pd.read_csv('graduation_dataset_preprocessed.csv')
+    best_features = select_n_best(n, data)
     for feature in data.columns:
         if feature not in best_features and feature != 'Target_Graduate':
             data.drop(feature, axis=1, inplace=True)
@@ -288,7 +289,6 @@ if __name__ == '__main__':
     # - may not be neccessary with pca or other data transformation/dimension reduction
     # - can do hyperparameter tuning using GridSearchCV
     # print(feature_extraction(data, True))
-    select_best()
-
+    select_best(13)
 
 
