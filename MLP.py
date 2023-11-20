@@ -59,7 +59,7 @@ class data_modeling:
             best_params = grid.best_params_
             print(f"Best params: {best_params}")
         else:
-            best_params={'alpha': 0.1, 'hidden_layer_sizes': (100,),'activation': 'logistic'}
+            best_params={'activation': 'identity', 'alpha': 0.1, 'hidden_layer_sizes': (50, 100, 50)}
        
         # Train the SVM classifier
         mlp = MLPClassifier(max_iter=maxIterations, **best_params)
@@ -129,11 +129,12 @@ class data_modeling:
         plt.xticks(x)
 
         #plot error between twoAvg and oneAvg
-        plt.plot(x,twoAvg,'r--')
-        plt.plot(x,oneAvg,'y--')
+        #plt.plot(x,twoAvg,'r--')
+        #plt.plot(x,oneAvg,'y--')
 
         #add ledgend
-        plt.legend(['Average Accuracy overall','Accuracy of 2 runs','Accuracy of 1 run'])
+        plt.legend(['Average Accuracy'])
+        #plt.legend(['Average Accuracy overall','Accuracy of 2 runs','Accuracy of 1 run'])
 
 
 
@@ -148,25 +149,24 @@ class data_modeling:
         plt.xlabel('Number of features')
         plt.ylabel('Average Accuracy')
         plt.show()
-    def runMLP(self, numberOfRuns,Tuning, maxIterations=2000):
         
-        #data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
-        #data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
-
-        #getting avg accuracy
-        max_iterations=maxIterations
-        number_of_runs=numberOfRuns
-        #start timer
-        start_time = time.time()
-
-        runs=[data_modeling.mpl(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test,max_iterations,Tuning) for i in range(number_of_runs)]
-        print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(runs)/number_of_runs}")
-        #end timer
-        print("--- %s seconds ---" % (time.time() - start_time))
+        
 
 
 
 if __name__ == '__main__':
-    data_modeling = data_modeling()
-    data_modeling.runMLP(1,False)
-    data_modeling.plotAccuracyOfHyperParamaterTuningRuns()
+    #data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+    #data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+
+    # #getting avg accuracy
+    # max_iterations=2000
+    # number_of_runs=5
+    # #start timer
+    # start_time = time.time()
+    # for i in range(number_of_runs):
+    #     datamodeling = data_modeling()
+    #     runs=[datamodeling.mpl(datamodeling.X_train, datamodeling.y_train, datamodeling.X_test, datamodeling.y_test,max_iterations,True)]
+    # print("--- %s seconds ---" % (time.time() - start_time))
+    # print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(runs)/number_of_runs}")
+    
+    print("Average accuracy for MLP after 5 runs:",sum([0.8634719710669078,0.8634719710669078,0.8634719710669078,0.8598553345388789,0.8625678119349005])/5)
