@@ -1,0 +1,172 @@
+
+
+import numpy as np
+import pandas as pd
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import RandomizedSearchCV, train_test_split
+from scipy.stats import randint
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.svm import SVC
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import learning_curve
+from sklearn.neural_network import MLPClassifier
+from features import select_best
+import time
+
+class data_modeling:
+
+    def __init__(self) -> None:
+        # Load your dataset
+        self.data = pd.read_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")  
+
+        # Split the data into test and train
+        self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],
+        self.data['Target_Graduate'], test_size=0.25, random_state=1)
+
+
+    def mpl(self, X_train, Y_train, X_test, Y_test,maxIterations,tune=False):
+        #standardize data
+        #from the documentation https://scikit-learn.org/stable/modules/neural_networks_supervised.html
+        scaler = StandardScaler()  
+        # Don't cheat - fit only on training data
+        scaler.fit(X_train)  
+        X_train = scaler.transform(X_train)  
+        # apply same transformation to test data
+        X_test = scaler.transform(X_test)
+
+        #hyperparameter tuning
+        if tune:
+            parameter_space = {
+                'hidden_layer_sizes': [(50,50,50), (50,100,50), (100,)], #trying diffrent number of layers and difrrent neuron count
+                'alpha': 10.0 ** -np.arange(1, 7),
+                'activation': ['identity', 'logistic', 'tanh', 'relu']
+
+            }
+            grid = GridSearchCV(MLPClassifier(max_iter=maxIterations), parameter_space, n_jobs=-1)
+            grid.fit(X_train, Y_train)
+
+            best_params = grid.best_params_
+            print(f"Best params: {best_params}")
+        else:
+            best_params={'alpha': 0.1, 'hidden_layer_sizes': (100,),'activation': 'logistic'}
+       
+        # Train the SVM classifier
+        mlp = MLPClassifier(max_iter=maxIterations, **best_params)
+        mlp.fit(X_train, Y_train)
+
+        # #predict the test set
+        predictions = mlp.predict(X_test)
+        # #print the metrics
+        self.metrics("MLP", Y_test, predictions)
+        return accuracy_score(Y_test, predictions)
+
+   
+    def metrics(self, modelStr, Y_test, Y_pred):
+
+        print("\n---------")
+        print(f"\nMetrics for {modelStr}:\n")
+
+        # Define metrics
+        class_report = classification_report(Y_test, Y_pred)
+        acc_score = accuracy_score(Y_test, Y_pred)
+        conf_matrix = confusion_matrix(list(Y_test), Y_pred)
+        
+
+        # Print metrics
+        print(class_report)
+        print(f"Accuracy for {modelStr}: \n{acc_score}")
+        print(f"Confusion matrix for {modelStr}: \n{conf_matrix}\n")
+
+        # Display metrics
+        # disp = ConfusionMatrixDisplay(conf_matrix)
+        # disp.plot()
+        # plt.show()
+    def plottingFeatures(self):
+        print("Happy data preprocessing and modeling!")
+        y=[]
+        x=list(range(1,35))
+        max_iterations=5000
+        number_of_runs=3
+        best_parameters=[{'activation': 'identity', 'alpha': 0.1, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'relu', 'alpha': 1e-05, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'relu', 'alpha': 1e-06, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'relu', 'alpha': 0.01, 'hidden_layer_sizes': (50, 100, 50)},{'activation': 'logistic', 'alpha': 0.001, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'tanh', 'alpha': 0.1, 'hidden_layer_sizes': (50, 100, 50)},{'activation': 'logistic', 'alpha': 1e-05, 'hidden_layer_sizes': (50, 100, 50)},{'activation': 'logistic', 'alpha': 0.0001, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'relu', 'alpha': 0.001, 'hidden_layer_sizes': (100,)},{'activation': 'relu', 'alpha': 0.0001, 'hidden_layer_sizes': (100,)},{'activation': 'tanh', 'alpha': 0.1, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'relu', 'alpha': 0.01, 'hidden_layer_sizes': (100,)},{'activation': 'logistic', 'alpha': 1e-05, 'hidden_layer_sizes': (50, 100, 50)},{'activation': 'logistic', 'alpha': 0.0001, 'hidden_layer_sizes': (50, 100, 50)},{'activation': 'tanh', 'alpha': 0.1, 'hidden_layer_sizes': (100,)},{'activation': 'identity', 'alpha': 0.1, 'hidden_layer_sizes': (100,)},{'activation': 'identity', 'alpha': 0.1, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'logistic', 'alpha': 1e-06, 'hidden_layer_sizes': (50, 100, 50)},{'activation': 'identity', 'alpha': 1e-06, 'hidden_layer_sizes': (100,)},{'activation': 'identity', 'alpha': 1e-06, 'hidden_layer_sizes': (100,)},{'activation': 'logistic', 'alpha': 0.1, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'logistic', 'alpha': 0.1, 'hidden_layer_sizes': (100,)},{'activation': 'identity', 'alpha': 1e-05, 'hidden_layer_sizes': (100,)},{'activation': 'identity', 'alpha': 0.0001, 'hidden_layer_sizes': (100,)},{'activation': 'logistic', 'alpha': 0.1, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'identity', 'alpha': 0.01, 'hidden_layer_sizes': (50, 100, 50)},{'activation': 'identity', 'alpha': 0.1, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'identity', 'alpha': 0.1, 'hidden_layer_sizes': (100,)},{'activation': 'identity', 'alpha': 1e-05, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'identity', 'alpha': 0.1, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'identity', 'alpha': 0.1, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'identity', 'alpha': 1e-05, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'identity', 'alpha': 1e-05, 'hidden_layer_sizes': (50, 50, 50)},{'activation': 'identity', 'alpha': 0.1, 'hidden_layer_sizes': (50, 50, 50)}]
+
+
+        for i in range(1,35):
+            select_best(i)
+            datamodeling = self.data_modeling()
+            runs=[]
+            #getting avg accuracy
+            runs=[datamodeling.mpl(datamodeling.X_train, datamodeling.y_train, datamodeling.X_test, datamodeling.y_test,max_iterations,True,best_parameters[i-1]) for i in range(number_of_runs)]
+            print(f"Average F1 for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(runs)/number_of_runs}")
+            y+=[sum(runs)/number_of_runs]
+            print(f"Iteration {i}/34")
+        print(y)
+
+        plt.plot(x,y)
+        plt.xlabel("Number of features")
+        plt.ylabel("F1 score")
+        plt.show()
+    def plotAccuracyOfHyperParamaterTuningRuns(self):
+        twoAvg=[0.8264014466546112, 0.8313743218806511, 0.8300180831826401, 0.8282097649186257, 0.8250452079566004, 0.8345388788426763, 0.8471971066907775, 0.846745027124774, 0.852622061482821, 0.8435804701627487, 0.8594032549728752, 0.8612115732368897, 0.8666365280289331, 0.8648282097649187, 0.8648282097649187, 0.8625678119349005, 0.8652802893309222, 0.8557866184448464, 0.8607594936708861, 0.8612115732368897, 0.8639240506329113, 0.8512658227848101, 0.8594032549728752, 0.8612115732368897, 0.860759493670886, 0.8589511754068716, 0.860759493670886, 0.8557866184448463, 0.8575949367088608, 0.8575949367088608, 0.8603074141048825, 0.8566907775768535, 0.8566907775768535, 0.8521699819168174]
+        oneAvg=[0.8264014466546112, 0.8309222423146474, 0.8318264014466547, 0.8300180831826401, 0.825497287522604, 0.8426763110307414, 0.8390596745027125,  0.8417721518987342,0.8544303797468354,0.8589511754068716, 0.8553345388788427, 0.8535262206148282, 0.8688969258589512, 0.8625678119349005, 0.8526220614828209, 0.8607594936708861, 0.8679927667269439, 0.8634719710669078, 0.8607594936708861, 0.8625678119349005, 0.8571428571428571, 0.8598553345388789, 0.8643761301989150, 0.8598553345388789, 0.8589511754068716, 0.859855334538879, 0.8598553345388789, 0.857142857142857, 0.8580470162748643, 0.8580470162748643, 0.8580470162748643, 0.8481012658227848, 0.8562386998010185, 0.8616636528028933]
+
+        y=[(2*twoAvg[i]+oneAvg[i])/3 for i in range(len(oneAvg))] 
+        x=range(1,len(y)+1)
+
+        standarddeviation= []
+        plt.plot(x,y)
+        #x axis show every number
+        plt.xticks(x)
+
+        #plot error between twoAvg and oneAvg
+        plt.plot(x,twoAvg,'r--')
+        plt.plot(x,oneAvg,'y--')
+
+        #add ledgend
+        plt.legend(['Average Accuracy overall','Accuracy of 2 runs','Accuracy of 1 run'])
+
+
+
+        #mark y ticks every 0.01 and the max and min values aswell
+        plt.yticks([i/100 for i in range(82,87)]+[0.825204,0.8672])
+        #plot the points in blue
+        plt.plot(x,y,'bo')
+
+        #add grid, with x=1 spacing, in grey, alternate dashes and lines
+        plt.grid(True, which='major', linestyle='--', color='grey')
+        plt.title('Average Accuracy of 3 runs vs. Number of Features')
+        plt.xlabel('Number of features')
+        plt.ylabel('Average Accuracy')
+        plt.show()
+    def runMLP(self, numberOfRuns,Tuning, maxIterations=2000):
+        
+        #data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+        #data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+
+        #getting avg accuracy
+        max_iterations=maxIterations
+        number_of_runs=numberOfRuns
+        #start timer
+        start_time = time.time()
+
+        runs=[data_modeling.mpl(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test,max_iterations,Tuning) for i in range(number_of_runs)]
+        print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(runs)/number_of_runs}")
+        #end timer
+        print("--- %s seconds ---" % (time.time() - start_time))
+
+
+
+if __name__ == '__main__':
+    data_modeling = data_modeling()
+    data_modeling.runMLP(1,False)
+    data_modeling.plotAccuracyOfHyperParamaterTuningRuns()
