@@ -158,15 +158,14 @@ if __name__ == '__main__':
     #data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
     #data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
 
-    # #getting avg accuracy
-    # max_iterations=2000
-    # number_of_runs=5
-    # #start timer
-    # start_time = time.time()
-    # for i in range(number_of_runs):
-    #     datamodeling = data_modeling()
-    #     runs=[datamodeling.mpl(datamodeling.X_train, datamodeling.y_train, datamodeling.X_test, datamodeling.y_test,max_iterations,True)]
-    # print("--- %s seconds ---" % (time.time() - start_time))
-    # print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(runs)/number_of_runs}")
+    #getting avg accuracy
+    max_iterations=2000
+    number_of_runs=5
+    #start timer
+    start_time = time.time()
+    for i in range(number_of_runs):
+        datamodeling = data_modeling()
+        runs=[datamodeling.mpl(datamodeling.X_train, datamodeling.y_train, datamodeling.X_test, datamodeling.y_test,max_iterations,True)]
+    print("--- %s seconds ---" % (time.time() - start_time))
+    print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(runs)/number_of_runs}")
     
-    print("Average accuracy for MLP after 5 runs:",sum([0.8634719710669078,0.8634719710669078,0.8634719710669078,0.8598553345388789,0.8625678119349005])/5)
