@@ -53,7 +53,7 @@ num_samples = len(real_data)
 synthetic_data = ctgan.sample(num_samples)
 
 # Save the synthetic data to a new CSV file
-synthetic_data.to_csv('SYNTHETIC_CTGAN_DATA.csv', index=False)
+# synthetic_data.to_csv('SYNTHETIC_CTGAN_DATA.csv', index=False)
 
 # ctgan.save('CTGAN_MODEL.pkl')
 
