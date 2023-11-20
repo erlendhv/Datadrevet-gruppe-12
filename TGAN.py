@@ -49,7 +49,7 @@ ctgan = CTGAN(verbose = True, epochs=1000, batch_size=300, generator_dim=(256, 2
 ctgan = CTGAN().load('CTGAN_MODEL.pkl')
 
 # Generate synthetic data
-num_samples = len(real_data)  # You can change this value as needed
+num_samples = len(real_data) 
 synthetic_data = ctgan.sample(num_samples)
 
 # Save the synthetic data to a new CSV file
@@ -194,8 +194,8 @@ def svm(X_train, Y_train, X_test, Y_test, tune = False, learning_curve = False):
         plt.show()
     
 
-random_forest(X_train, y_train, X_test, y_test, tune = False)
-svm(X_train, y_train, X_test, y_test, tune = False)
+random_forest(X_train, y_train, X_test, y_test, tune = False, learning_curve = False)
+# svm(X_train, y_train, X_test, y_test, tune = False)
 
 
 # print(data.shape, synthetic_data.shape)
