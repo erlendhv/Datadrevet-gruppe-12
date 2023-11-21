@@ -17,7 +17,7 @@ from sklearn.preprocessing import PolynomialFeatures
 
 
 class Ensemble:
-    def __init__(self):
+    def __init__(self, train_test_sets=None):
         self.data = pd.read_csv('graduation_dataset.csv')
 
         """
@@ -45,12 +45,16 @@ class Ensemble:
 
         self.data = self.data.drop([feature for feature in self.data.columns if feature not in best_features and feature!='Target_Graduate'], axis=1)
 
-        # train/test split
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],self.data['Target_Graduate'], test_size=0.25, random_state=1)
+        if train_test_sets is None:
+            # train/test split  
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],self.data['Target_Graduate'], test_size=0.25, random_state=1)
+        else:
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_sets
         # need to scale for SVM
         sc = StandardScaler()
         self.X_train_scaled = sc.fit_transform(self.X_train)
         self.X_test_scaled = sc.fit_transform(self.X_test)
+
 
     # Evaluate the performance
     # Define metrics
@@ -203,7 +207,10 @@ class Ensemble:
         rf_preds = []
         svc_preds = []
         xgb_preds = []
+        stack_accs = []
+
         stack_preds = []
+
         for _ in range(runs):
             # Create and fit the stacking classifier
             stacking_clf = StackingClassifier(estimators=self.tuned_base_models, final_estimator=self.grid_search_meta.best_estimator_, cv=5, passthrough=False, stack_method='auto')
@@ -211,7 +218,8 @@ class Ensemble:
 
             # Make predictions
             y_pred = stacking_clf.predict(self.X_test)
-            stack_preds.append(accuracy_score(y_true=self.y_test, y_pred=y_pred))
+            stack_preds.append(y_pred)
+            stack_accs.append(accuracy_score(y_true=self.y_test, y_pred=y_pred))
             self.metrics("Stacking Classifier", self.y_test, y_pred)
 
             rf = RandomForestClassifier(max_depth=9, max_features=3, n_estimators=300).fit(self.X_train, self.y_train)
@@ -232,11 +240,11 @@ class Ensemble:
         print('average for rf: ' + str(sum(rf_preds)/runs))
         print('average for svc: ' + str(sum(svc_preds)/runs))
         print('average for xgb: ' + str(sum(xgb_preds)/runs))
-        print('average for stacking: ' + str(sum(stack_preds)/runs))
+        print('average for stacking: ' + str(sum(stack_accs)/runs))
         """
         Currently best: 0.87432188, using 13 or 15 features. XGBoost gets the same performance. Large variations each time. Stacking not consistently better
         """
-        return stack_preds, rf_pred, svm_pred, xgb_pred
+        return stack_accs, rf_pred, svm_pred, xgb_pred, stack_preds
 
     def two_layer_stack(self):
         models = [
@@ -307,7 +315,7 @@ class Ensemble:
 
 if __name__ == '__main__':
     ensemble = Ensemble()
-    stack_pred, rf_pred, svm_pred, xgb_pred = ensemble.stacking()
+    stack_accs, rf_pred, svm_pred, xgb_pred, stack_preds = ensemble.stacking()
     predictions = {'RandomForest': rf_pred,
                     'SVC': svm_pred,
                     'XGBoost': xgb_pred,

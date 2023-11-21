@@ -32,7 +32,7 @@ class data_modeling:
         self.data = pd.read_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")  
 
         # Split the data into test and train
-        self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],
         self.data['Target_Graduate'], test_size=0.25, random_state=1)
 
 
@@ -164,30 +164,67 @@ class data_modeling:
         plt.show()         
 
 
+def compare(model_predictions):
+    """
+    Compare results of different models.
+    Must be run on same test-set.
+
+    model_predictions should be on list format.\n 
+    Eg: [modelpreds1, modelpreds2, ...]
+    """
+
+    test_length = len(model_predictions[0])
+
+    disagreements = 0
+
+    for i in range(test_length):
+    # Compare element on index for all models
+        prediction_at_index = [model[i] for model in model_predictions]
+
+        print()
+        # Check if there are differences among the model predictions
+        if len(set(prediction_at_index)) > 1:
+            disagreements += 1
+
+    print('Total number of disagreements is ' + str(disagreements))
+    print('The length of the test set is ' + str(test_length))
+    print('Fraction of disagreements is ' + str(round(disagreements/test_length, 3)))
+    return disagreements
+
+def getTestTrainSets():
+    data = pd.read_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")  
+
+    # Split the data into test and train
+    return train_test_split(data[data.columns[data.columns != 'Target_Graduate']],
+    data['Target_Graduate'], test_size=0.25, random_state=1)
 
 
 
 
 if __name__ == '__main__':
-    #data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
-    #data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
 
-    ens = ensemble.Ensemble()
-    stack_preds, rf_pred, svm_pred, xgb_pred = ens.stacking(runs=3)
-
-    #getting avg accuracy
     max_iterations=2000
     number_of_runs=1
+
+    testTrainSets = getTestTrainSets()
+    X_train, X_test, y_train, y_test = testTrainSets
+
+    # data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+    # data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+
+    ens = ensemble.Ensemble(train_test_sets=testTrainSets)
+    stack_accs, rf_pred, svm_pred, xgb_pred, stack_preds = ens.stacking(runs=number_of_runs)
+
     #start timer
     start_time = time.time()
     # for i in range(number_of_runs):
     datamodeling = data_modeling()
-    mlp_preds, mlp_accs = datamodeling.mlp(datamodeling.X_train, datamodeling.y_train, datamodeling.X_test, datamodeling.y_test,max_iterations,True, 3)
+    mlp_preds, mlp_accs = datamodeling.mlp(X_train, y_train, X_test, y_test,max_iterations,True, number_of_runs)
     print("--- %s seconds ---" % (time.time() - start_time))
     print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(mlp_accs)/number_of_runs}")
 
-    predictions = {'Stacking': stack_preds,
-                    'MLP': mlp_preds,
-                    }
-    ens.model_disagreements(predictions)
+    print(stack_preds)
+    print(mlp_preds)
+    predictions = [stack_preds[0], mlp_preds[0]]
+    compare(predictions)
     
