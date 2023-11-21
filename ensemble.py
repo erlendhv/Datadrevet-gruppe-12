@@ -154,7 +154,7 @@ class Ensemble:
     """
     STACKING TUNING
     """
-    def stacking(self):
+    def stacking(self, runs=10):
         base_models = [
             RandomForestClassifier(max_depth=9, max_features=3, n_estimators=300).fit(self.X_train, self.y_train),
             SVC(C=10, gamma=0.01, kernel='rbf').fit(self.X_train_scaled, self.y_train),
@@ -204,7 +204,7 @@ class Ensemble:
         svc_preds = []
         xgb_preds = []
         stack_preds = []
-        for _ in range(10):
+        for _ in range(runs):
             # Create and fit the stacking classifier
             stacking_clf = StackingClassifier(estimators=self.tuned_base_models, final_estimator=self.grid_search_meta.best_estimator_, cv=5, passthrough=False, stack_method='auto')
             stacking_clf.fit(self.X_train, self.y_train)
@@ -229,14 +229,14 @@ class Ensemble:
             xgb_preds.append(accuracy_score(y_true=self.y_test, y_pred=xgb_pred))
             self.metrics('XGBoost', xgb_pred, self.y_test)
 
-        print('average for rf: ' + str(sum(rf_preds)/10))
-        print('average for svc: ' + str(sum(svc_preds)/10))
-        print('average for xgb: ' + str(sum(xgb_preds)/10))
-        print('average for stacking: ' + str(sum(stack_preds)/10))
+        print('average for rf: ' + str(sum(rf_preds)/runs))
+        print('average for svc: ' + str(sum(svc_preds)/runs))
+        print('average for xgb: ' + str(sum(xgb_preds)/runs))
+        print('average for stacking: ' + str(sum(stack_preds)/runs))
         """
         Currently best: 0.87432188, using 13 or 15 features. XGBoost gets the same performance. Large variations each time. Stacking not consistently better
         """
-        return rf_pred, svm_pred, xgb_pred
+        return stack_preds, rf_pred, svm_pred, xgb_pred
 
     def two_layer_stack(self):
         models = [
@@ -307,7 +307,7 @@ class Ensemble:
 
 if __name__ == '__main__':
     ensemble = Ensemble()
-    rf_pred, svm_pred, xgb_pred = ensemble.stacking()
+    stack_pred, rf_pred, svm_pred, xgb_pred = ensemble.stacking()
     predictions = {'RandomForest': rf_pred,
                     'SVC': svm_pred,
                     'XGBoost': xgb_pred,

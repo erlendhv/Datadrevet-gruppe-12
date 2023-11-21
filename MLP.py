@@ -23,6 +23,7 @@ from sklearn.model_selection import learning_curve
 from sklearn.neural_network import MLPClassifier
 from features import select_best
 import time
+import ensemble
 
 class data_modeling:
 
@@ -35,7 +36,7 @@ class data_modeling:
         self.data['Target_Graduate'], test_size=0.25, random_state=1)
 
 
-    def mpl(self, X_train, Y_train, X_test, Y_test,maxIterations,tune=False):
+    def mlp_single(self, X_train, Y_train, X_test, Y_test,maxIterations,tune=False):
         #standardize data
         #from the documentation https://scikit-learn.org/stable/modules/neural_networks_supervised.html
         scaler = StandardScaler()  
@@ -69,7 +70,19 @@ class data_modeling:
         predictions = mlp.predict(X_test)
         # #print the metrics
         self.metrics("MLP", Y_test, predictions)
-        return accuracy_score(Y_test, predictions)
+        return predictions, accuracy_score(Y_test, predictions)
+
+    def mlp(self, X_train, Y_train, X_test, Y_test,maxIterations,tune=False, runs=3):
+
+        acc_avg = []
+        pred_avg = []
+
+        for _ in range(runs):
+            pred, acc = self.mlp_single(X_train, Y_train, X_test, Y_test,maxIterations,tune)
+            pred_avg.append(pred)
+            acc_avg.append(acc)
+        
+        return pred_avg, acc_avg
 
    
     def metrics(self, modelStr, Y_test, Y_pred):
@@ -148,9 +161,10 @@ class data_modeling:
         plt.title('Average Accuracy of 3 runs vs. Number of Features')
         plt.xlabel('Number of features')
         plt.ylabel('Average Accuracy')
-        plt.show()
-        
-        
+        plt.show()         
+
+
+
 
 
 
@@ -158,14 +172,22 @@ if __name__ == '__main__':
     #data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
     #data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
 
+    ens = ensemble.Ensemble()
+    stack_preds, rf_pred, svm_pred, xgb_pred = ens.stacking(runs=3)
+
     #getting avg accuracy
     max_iterations=2000
-    number_of_runs=5
+    number_of_runs=1
     #start timer
     start_time = time.time()
-    for i in range(number_of_runs):
-        datamodeling = data_modeling()
-        runs=[datamodeling.mpl(datamodeling.X_train, datamodeling.y_train, datamodeling.X_test, datamodeling.y_test,max_iterations,True)]
+    # for i in range(number_of_runs):
+    datamodeling = data_modeling()
+    mlp_preds, mlp_accs = datamodeling.mlp(datamodeling.X_train, datamodeling.y_train, datamodeling.X_test, datamodeling.y_test,max_iterations,True, 3)
     print("--- %s seconds ---" % (time.time() - start_time))
-    print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(runs)/number_of_runs}")
+    print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(mlp_accs)/number_of_runs}")
+
+    predictions = {'Stacking': stack_preds,
+                    'MLP': mlp_preds,
+                    }
+    ens.model_disagreements(predictions)
     
