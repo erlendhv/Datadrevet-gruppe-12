@@ -310,14 +310,15 @@ def model_disagreements(y_test, predictions):
     predictions['TrueLabel'] = y_test
     predictions_df = pd.DataFrame(predictions)
 
-    predictions_df['Disagreement'] = predictions_df.apply(lambda x: len(set(x[:-2])) > 1, axis=1)
+    slicing = len(predictions)-1
+    predictions_df['Disagreement'] = predictions_df.apply(lambda x: len(set(x[:slicing])) > 1, axis=1)
 
     disagreements = predictions_df[predictions_df['Disagreement']]
 
     print(predictions_df[predictions_df['Disagreement']==True])
-    print('Total number of disagreements is ' + str(disagreements['Disagreement'].value_counts()[True]))
+    print('Total number of disagreements is ' + str(predictions_df['Disagreement'].value_counts()[True]))
     print('The length of the test set is ' + str(len(y_test)))
-    print('Fraction of disagreements is ' + str(disagreements['Disagreement'].value_counts()[True]/len(y_test)))
+    print('Fraction of disagreements is ' + str(predictions_df['Disagreement'].value_counts()[True]/len(y_test)))
 
 if __name__ == '__main__':
     ensemble = Ensemble()

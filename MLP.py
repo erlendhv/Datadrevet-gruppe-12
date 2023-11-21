@@ -25,26 +25,32 @@ from features import select_best
 import time
 import ensemble
 
-class data_modeling:
+class MLP:
 
-    def __init__(self) -> None:
+    def __init__(self, train_test_sets=None) -> None:
         # Load your dataset
-        self.data = pd.read_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")  
 
-        # Split the data into test and train
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],
-        self.data['Target_Graduate'], test_size=0.25, random_state=1)
+        if train_test_sets is None:
+            self.data = pd.read_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")  
+            # Split the data into test and train
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],
+                                                                                    self.data['Target_Graduate'], test_size=0.25, random_state=1)
+        else:
+            # Use inputed traing and test-sets
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_sets
+
+        
 
 
-    def mlp_single(self, X_train, Y_train, X_test, Y_test,maxIterations,tune=False):
+    def mlp_single(self, maxIterations,tune=False):
         #standardize data
         #from the documentation https://scikit-learn.org/stable/modules/neural_networks_supervised.html
         scaler = StandardScaler()  
         # Don't cheat - fit only on training data
-        scaler.fit(X_train)  
-        X_train = scaler.transform(X_train)  
+        scaler.fit(self.X_train)  
+        self.X_train = scaler.transform(self.X_train)  
         # apply same transformation to test data
-        X_test = scaler.transform(X_test)
+        self.X_test = scaler.transform(self.X_test)
 
         #hyperparameter tuning
         if tune:
@@ -55,7 +61,7 @@ class data_modeling:
 
             }
             grid = GridSearchCV(MLPClassifier(max_iter=maxIterations), parameter_space, n_jobs=-1)
-            grid.fit(X_train, Y_train)
+            grid.fit(self.X_train, self.y_train)
 
             best_params = grid.best_params_
             print(f"Best params: {best_params}")
@@ -64,21 +70,21 @@ class data_modeling:
        
         # Train the SVM classifier
         mlp = MLPClassifier(max_iter=maxIterations, **best_params)
-        mlp.fit(X_train, Y_train)
+        mlp.fit(self.X_train, self.y_train)
 
         # #predict the test set
-        predictions = mlp.predict(X_test)
+        predictions = mlp.predict(self.X_test)
         # #print the metrics
-        self.metrics("MLP", Y_test, predictions)
-        return predictions, accuracy_score(Y_test, predictions)
+        self.metrics("MLP", self.y_test, predictions)
+        return predictions, accuracy_score(self.y_test, predictions)
 
-    def mlp(self, X_train, Y_train, X_test, Y_test,maxIterations,tune=False, runs=3):
+    def mlp(self, maxIterations,tune=False, runs=3):
 
         acc_avg = []
         pred_avg = []
 
         for _ in range(runs):
-            pred, acc = self.mlp_single(X_train, Y_train, X_test, Y_test,maxIterations,tune)
+            pred, acc = self.mlp_single(maxIterations,tune)
             pred_avg.append(pred)
             acc_avg.append(acc)
         
@@ -105,6 +111,7 @@ class data_modeling:
         # disp = ConfusionMatrixDisplay(conf_matrix)
         # disp.plot()
         # plt.show()
+
     def plottingFeatures(self):
         print("Happy data preprocessing and modeling!")
         y=[]
@@ -218,13 +225,12 @@ if __name__ == '__main__':
     #start timer
     start_time = time.time()
     # for i in range(number_of_runs):
-    datamodeling = data_modeling()
-    mlp_preds, mlp_accs = datamodeling.mlp(X_train, y_train, X_test, y_test,max_iterations,True, number_of_runs)
+    datamodeling = MLP(testTrainSets)
+    mlp_preds, mlp_accs = datamodeling.mlp(max_iterations, True, runs=number_of_runs)
     print("--- %s seconds ---" % (time.time() - start_time))
     print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(mlp_accs)/number_of_runs}")
 
-    print(stack_preds)
-    print(mlp_preds)
-    predictions = [stack_preds[0], mlp_preds[0]]
-    compare(predictions)
+    predictions = {"Stacking": stack_preds[0], 
+                   "MLP": mlp_preds[0],}
+    ensemble.model_disagreements(y_test, predictions)
     
