@@ -297,24 +297,30 @@ class Ensemble:
         """
 
     """
-    See when base models predict different
+    See when models predict different
     """
-def model_disagreements(y_test, predictions):
+def model_comparisons(y_test, predictions):
     """
+    See when models predict different
+
+    If predictions or test-set differ the code will crash.
+
+    Input must be a dictionary containing single lists/arrays
+
     predictions should be on this form:
     {'RandomForest': rf_pred,
     'SVC': svm_pred,
     'XGBoost': xgb_pred
     }
     """
+
     predictions['TrueLabel'] = y_test
     predictions_df = pd.DataFrame(predictions)
 
     slicing = len(predictions)-1
     predictions_df['Disagreement'] = predictions_df.apply(lambda x: len(set(x[:slicing])) > 1, axis=1)
 
-    disagreements = predictions_df[predictions_df['Disagreement']]
-
+    print('\n--- Model comparisons---\n')
     print(predictions_df[predictions_df['Disagreement']==True])
     print('Total number of disagreements is ' + str(predictions_df['Disagreement'].value_counts()[True]))
     print('The length of the test set is ' + str(len(y_test)))
@@ -327,4 +333,4 @@ if __name__ == '__main__':
                     'SVC': svm_preds[0],
                     'XGBoost': xgb_preds[0],
                     }
-    model_disagreements(ensemble.y_test, predictions)
+    model_comparisons(ensemble.y_test, predictions)

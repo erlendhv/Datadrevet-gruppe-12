@@ -216,15 +216,13 @@ if __name__ == '__main__':
     testTrainSets = getTestTrainSets()
     X_train, X_test, y_train, y_test = testTrainSets
 
-    # data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
-    # data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
-
     ens = ensemble.Ensemble(train_test_sets=testTrainSets)
+
     stack_accs, rf_pred, svm_pred, xgb_pred, stack_preds = ens.stacking(runs=number_of_runs)
 
     #start timer
     start_time = time.time()
-    # for i in range(number_of_runs):
+    # for i in range(number_of_runs): #If uncommenting: testrainset net to be computed every time
     datamodeling = MLP(testTrainSets)
     mlp_preds, mlp_accs = datamodeling.mlp(max_iterations, True, runs=number_of_runs)
     print("--- %s seconds ---" % (time.time() - start_time))
@@ -232,5 +230,5 @@ if __name__ == '__main__':
 
     predictions = {"Stacking": stack_preds[0], 
                    "MLP": mlp_preds[0],}
-    ensemble.model_disagreements(y_test, predictions)
+    ensemble.model_comparisons(y_test, predictions)
     
