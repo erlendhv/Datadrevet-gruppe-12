@@ -17,7 +17,7 @@ from sklearn.preprocessing import PolynomialFeatures
 
 
 class Ensemble:
-    def __init__(self):
+    def __init__(self, train_test_sets=None):
         self.data = pd.read_csv('graduation_dataset.csv')
 
         """
@@ -45,12 +45,16 @@ class Ensemble:
 
         self.data = self.data.drop([feature for feature in self.data.columns if feature not in best_features and feature!='Target_Graduate'], axis=1)
 
-        # train/test split
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],self.data['Target_Graduate'], test_size=0.25, random_state=1)
+        if train_test_sets is None:
+            # train/test split  
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],self.data['Target_Graduate'], test_size=0.25, random_state=1)
+        else:
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_sets
         # need to scale for SVM
         sc = StandardScaler()
         self.X_train_scaled = sc.fit_transform(self.X_train)
         self.X_test_scaled = sc.fit_transform(self.X_test)
+
 
     # Evaluate the performance
     # Define metrics
@@ -154,7 +158,7 @@ class Ensemble:
     """
     STACKING TUNING
     """
-    def stacking(self):
+    def stacking(self, runs=10):
         base_models = [
             RandomForestClassifier(max_depth=9, max_features=3, n_estimators=300).fit(self.X_train, self.y_train),
             SVC(C=10, gamma=0.01, kernel='rbf').fit(self.X_train_scaled, self.y_train),
@@ -200,43 +204,53 @@ class Ensemble:
         accuracy = grid_search_stacking.score(self.X_test, self.y_test)
         print("Accuracy on Test Set:", accuracy)
         """
+        rf_accs = []
+        svc_accs = []
+        xgb_accs = []
+        stack_accs = []
+
         rf_preds = []
         svc_preds = []
         xgb_preds = []
         stack_preds = []
-        for _ in range(10):
+
+        for _ in range(runs):
             # Create and fit the stacking classifier
             stacking_clf = StackingClassifier(estimators=self.tuned_base_models, final_estimator=self.grid_search_meta.best_estimator_, cv=5, passthrough=False, stack_method='auto')
             stacking_clf.fit(self.X_train, self.y_train)
 
             # Make predictions
             y_pred = stacking_clf.predict(self.X_test)
-            stack_preds.append(accuracy_score(y_true=self.y_test, y_pred=y_pred))
+            stack_preds.append(y_pred)
+            stack_accs.append(accuracy_score(y_true=self.y_test, y_pred=y_pred))
             self.metrics("Stacking Classifier", self.y_test, y_pred)
 
             rf = RandomForestClassifier(max_depth=9, max_features=3, n_estimators=300).fit(self.X_train, self.y_train)
             rf_pred = rf.predict(self.X_test)
-            rf_preds.append(accuracy_score(y_true=self.y_test, y_pred=rf_pred))
+            rf_preds.append(rf_pred)
+            rf_accs.append(accuracy_score(y_true=self.y_test, y_pred=rf_pred))
             self.metrics('Random Forest', rf_pred, self.y_test)
 
             svm = SVC(C=10, gamma=0.01, kernel='rbf').fit(self.X_train_scaled, self.y_train)
             svm_pred = svm.predict(self.X_test_scaled)
-            svc_preds.append(accuracy_score(y_true=self.y_test, y_pred=svm_pred))
+            svc_preds.append(svm_pred)
+            svc_accs.append(accuracy_score(y_true=self.y_test, y_pred=svm_pred))
             self.metrics('SVM', svm_pred, self.y_test)
 
             xgb = XGBClassifier(colsample_bytree=1.0, gamma=0, learning_rate=0.1, max_depth=3, min_child_weight=5, n_estimators=300, scale_pos_weight=1, subsample=0.9).fit(self.X_train, self.y_train)
             xgb_pred = xgb.predict(self.X_test)
-            xgb_preds.append(accuracy_score(y_true=self.y_test, y_pred=xgb_pred))
+            xgb_preds.append(xgb_pred)
+            xgb_accs.append(accuracy_score(y_true=self.y_test, y_pred=xgb_pred))
             self.metrics('XGBoost', xgb_pred, self.y_test)
 
-        print('average for rf: ' + str(sum(rf_preds)/10))
-        print('average for svc: ' + str(sum(svc_preds)/10))
-        print('average for xgb: ' + str(sum(xgb_preds)/10))
-        print('average for stacking: ' + str(sum(stack_preds)/10))
+        print('average for rf: ' + str(sum(rf_accs)/runs))
+        print('average for svc: ' + str(sum(svc_accs)/runs))
+        print('average for xgb: ' + str(sum(xgb_accs)/runs))
+        print('average for stacking: ' + str(sum(stack_accs)/runs))
         """
         Currently best: 0.87432188, using 13 or 15 features. XGBoost gets the same performance. Large variations each time. Stacking not consistently better
         """
-        return rf_pred, svm_pred, xgb_pred
+        return stack_accs, rf_preds, svc_preds, xgb_preds, stack_preds
 
     def two_layer_stack(self):
         models = [
@@ -283,33 +297,40 @@ class Ensemble:
         """
 
     """
-    See when base models predict different
+    See when models predict different
     """
-    def model_disagreements(self, predictions):
-        """
-        predictions should be on this form:
-        {'RandomForest': rf_pred,
-        'SVC': svm_pred,
-        'XGBoost': xgb_pred
-        }
-        """
-        predictions['TrueLabel'] = self.y_test
-        predictions_df = pd.DataFrame(predictions)
+def model_comparisons(y_test, predictions):
+    """
+    See when models predict different
 
-        predictions_df['Disagreement'] = predictions_df.apply(lambda x: len(set(x[:-2])) > 1, axis=1)
+    If predictions or test-set differ the code will crash.
 
-        disagreements = predictions_df[predictions_df['Disagreement']]
+    Input must be a dictionary containing single lists/arrays
 
-        print(predictions_df[predictions_df['Disagreement']==True])
-        print('Total number of disagreements is ' + str(disagreements['Disagreement'].value_counts()[True]))
-        print('The length of the test set is ' + str(len(self.y_test)))
-        print('Fraction of disagreements is ' + str(disagreements['Disagreement'].value_counts()[True]/len(self.y_test)))
+    predictions should be on this form:
+    {'RandomForest': rf_pred,
+    'SVC': svm_pred,
+    'XGBoost': xgb_pred
+    }
+    """
+
+    predictions['TrueLabel'] = y_test
+    predictions_df = pd.DataFrame(predictions)
+
+    slicing = len(predictions)-1
+    predictions_df['Disagreement'] = predictions_df.apply(lambda x: len(set(x[:slicing])) > 1, axis=1)
+
+    print('\n--- Model comparisons---\n')
+    print(predictions_df[predictions_df['Disagreement']==True])
+    print('Total number of disagreements is ' + str(predictions_df['Disagreement'].value_counts()[True]))
+    print('The length of the test set is ' + str(len(y_test)))
+    print('Fraction of disagreements is ' + str(predictions_df['Disagreement'].value_counts()[True]/len(y_test)))
 
 if __name__ == '__main__':
     ensemble = Ensemble()
-    rf_pred, svm_pred, xgb_pred = ensemble.stacking()
-    predictions = {'RandomForest': rf_pred,
-                    'SVC': svm_pred,
-                    'XGBoost': xgb_pred,
+    stack_accs, rf_preds, svm_preds, xgb_preds, stack_preds = ensemble.stacking(runs=1)
+    predictions = {'RandomForest': rf_preds[0],
+                    'SVC': svm_preds[0],
+                    'XGBoost': xgb_preds[0],
                     }
-    ensemble.model_disagreements(predictions)
+    model_comparisons(ensemble.y_test, predictions)

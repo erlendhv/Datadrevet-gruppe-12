@@ -23,27 +23,34 @@ from sklearn.model_selection import learning_curve
 from sklearn.neural_network import MLPClassifier
 from features import select_best
 import time
+import ensemble
 
-class data_modeling:
+class MLP:
 
-    def __init__(self) -> None:
+    def __init__(self, train_test_sets=None) -> None:
         # Load your dataset
-        self.data = pd.read_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")  
 
-        # Split the data into test and train
-        self.X_train, self.X_test, self.y_train, self.y_test = X_train, X_test, y_train, y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],
-        self.data['Target_Graduate'], test_size=0.25, random_state=1)
+        if train_test_sets is None:
+            self.data = pd.read_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")  
+            # Split the data into test and train
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],
+                                                                                    self.data['Target_Graduate'], test_size=0.25, random_state=1)
+        else:
+            # Use inputed traing and test-sets
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_sets
+
+        
 
 
-    def mpl(self, X_train, Y_train, X_test, Y_test,maxIterations,tune=False):
+    def mlp_single(self, maxIterations,tune=False):
         #standardize data
         #from the documentation https://scikit-learn.org/stable/modules/neural_networks_supervised.html
         scaler = StandardScaler()  
         # Don't cheat - fit only on training data
-        scaler.fit(X_train)  
-        X_train = scaler.transform(X_train)  
+        scaler.fit(self.X_train)  
+        self.X_train = scaler.transform(self.X_train)  
         # apply same transformation to test data
-        X_test = scaler.transform(X_test)
+        self.X_test = scaler.transform(self.X_test)
 
         #hyperparameter tuning
         if tune:
@@ -54,22 +61,34 @@ class data_modeling:
 
             }
             grid = GridSearchCV(MLPClassifier(max_iter=maxIterations), parameter_space, n_jobs=-1)
-            grid.fit(X_train, Y_train)
+            grid.fit(self.X_train, self.y_train)
 
             best_params = grid.best_params_
             print(f"Best params: {best_params}")
         else:
-            best_params={'alpha': 0.1, 'hidden_layer_sizes': (100,),'activation': 'logistic'}
+            best_params={'activation': 'identity', 'alpha': 0.1, 'hidden_layer_sizes': (50, 100, 50)}
        
         # Train the SVM classifier
         mlp = MLPClassifier(max_iter=maxIterations, **best_params)
-        mlp.fit(X_train, Y_train)
+        mlp.fit(self.X_train, self.y_train)
 
         # #predict the test set
-        predictions = mlp.predict(X_test)
+        predictions = mlp.predict(self.X_test)
         # #print the metrics
-        self.metrics("MLP", Y_test, predictions)
-        return accuracy_score(Y_test, predictions)
+        self.metrics("MLP", self.y_test, predictions)
+        return predictions, accuracy_score(self.y_test, predictions)
+
+    def mlp(self, maxIterations,tune=False, runs=3):
+
+        acc_avg = []
+        pred_avg = []
+
+        for _ in range(runs):
+            pred, acc = self.mlp_single(maxIterations,tune)
+            pred_avg.append(pred)
+            acc_avg.append(acc)
+        
+        return pred_avg, acc_avg
 
    
     def metrics(self, modelStr, Y_test, Y_pred):
@@ -92,6 +111,7 @@ class data_modeling:
         # disp = ConfusionMatrixDisplay(conf_matrix)
         # disp.plot()
         # plt.show()
+
     def plottingFeatures(self):
         print("Happy data preprocessing and modeling!")
         y=[]
@@ -129,11 +149,12 @@ class data_modeling:
         plt.xticks(x)
 
         #plot error between twoAvg and oneAvg
-        plt.plot(x,twoAvg,'r--')
-        plt.plot(x,oneAvg,'y--')
+        #plt.plot(x,twoAvg,'r--')
+        #plt.plot(x,oneAvg,'y--')
 
         #add ledgend
-        plt.legend(['Average Accuracy overall','Accuracy of 2 runs','Accuracy of 1 run'])
+        plt.legend(['Average Accuracy'])
+        #plt.legend(['Average Accuracy overall','Accuracy of 2 runs','Accuracy of 1 run'])
 
 
 
@@ -147,26 +168,67 @@ class data_modeling:
         plt.title('Average Accuracy of 3 runs vs. Number of Features')
         plt.xlabel('Number of features')
         plt.ylabel('Average Accuracy')
-        plt.show()
-    def runMLP(self, numberOfRuns,Tuning, maxIterations=2000):
-        
-        #data_modeling.random_forest(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
-        #data_modeling.svm(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test)
+        plt.show()         
 
-        #getting avg accuracy
-        max_iterations=maxIterations
-        number_of_runs=numberOfRuns
-        #start timer
-        start_time = time.time()
 
-        runs=[data_modeling.mpl(data_modeling.X_train, data_modeling.y_train, data_modeling.X_test, data_modeling.y_test,max_iterations,Tuning) for i in range(number_of_runs)]
-        print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(runs)/number_of_runs}")
-        #end timer
-        print("--- %s seconds ---" % (time.time() - start_time))
+def compare(model_predictions):
+    """
+    Compare results of different models.
+    Must be run on same test-set.
+
+    model_predictions should be on list format.\n 
+    Eg: [modelpreds1, modelpreds2, ...]
+    """
+
+    test_length = len(model_predictions[0])
+
+    disagreements = 0
+
+    for i in range(test_length):
+    # Compare element on index for all models
+        prediction_at_index = [model[i] for model in model_predictions]
+
+        print()
+        # Check if there are differences among the model predictions
+        if len(set(prediction_at_index)) > 1:
+            disagreements += 1
+
+    print('Total number of disagreements is ' + str(disagreements))
+    print('The length of the test set is ' + str(test_length))
+    print('Fraction of disagreements is ' + str(round(disagreements/test_length, 3)))
+    return disagreements
+
+def getTestTrainSets():
+    data = pd.read_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")  
+
+    # Split the data into test and train
+    return train_test_split(data[data.columns[data.columns != 'Target_Graduate']],
+    data['Target_Graduate'], test_size=0.25, random_state=1)
+
 
 
 
 if __name__ == '__main__':
-    data_modeling = data_modeling()
-    data_modeling.runMLP(1,False)
-    data_modeling.plotAccuracyOfHyperParamaterTuningRuns()
+
+    max_iterations=2000
+    number_of_runs=1
+
+    testTrainSets = getTestTrainSets()
+    X_train, X_test, y_train, y_test = testTrainSets
+
+    ens = ensemble.Ensemble(train_test_sets=testTrainSets)
+
+    stack_accs, rf_pred, svm_pred, xgb_pred, stack_preds = ens.stacking(runs=number_of_runs)
+
+    #start timer
+    start_time = time.time()
+    # for i in range(number_of_runs): #If uncommenting: testrainset net to be computed every time
+    datamodeling = MLP(testTrainSets)
+    mlp_preds, mlp_accs = datamodeling.mlp(max_iterations, True, runs=number_of_runs)
+    print("--- %s seconds ---" % (time.time() - start_time))
+    print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(mlp_accs)/number_of_runs}")
+
+    predictions = {"Stacking": stack_preds[0], 
+                   "MLP": mlp_preds[0],}
+    ensemble.model_comparisons(y_test, predictions)
+    
