@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import accuracy_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV, train_test_split
 from scipy.stats import randint
@@ -24,6 +24,7 @@ from sklearn.neural_network import MLPClassifier
 from features import select_best
 import time
 import ensemble
+import metrics
 
 class MLP:
 
@@ -75,42 +76,18 @@ class MLP:
         # #predict the test set
         predictions = mlp.predict(self.X_test)
         # #print the metrics
-        self.metrics("MLP", self.y_test, predictions)
-        return predictions, accuracy_score(self.y_test, predictions)
+        metrics.print_metrics("MLP", self.y_test, predictions)
+        return predictions
 
     def mlp(self, maxIterations,tune=False, runs=3):
 
-        acc_avg = []
         pred_avg = []
 
         for _ in range(runs):
-            pred, acc = self.mlp_single(maxIterations,tune)
+            pred= self.mlp_single(maxIterations,tune)
             pred_avg.append(pred)
-            acc_avg.append(acc)
         
-        return pred_avg, acc_avg
-
-   
-    def metrics(self, modelStr, Y_test, Y_pred):
-
-        print("\n---------")
-        print(f"\nMetrics for {modelStr}:\n")
-
-        # Define metrics
-        class_report = classification_report(Y_test, Y_pred)
-        acc_score = accuracy_score(Y_test, Y_pred)
-        conf_matrix = confusion_matrix(list(Y_test), Y_pred)
-        
-
-        # Print metrics
-        print(class_report)
-        print(f"Accuracy for {modelStr}: \n{acc_score}")
-        print(f"Confusion matrix for {modelStr}: \n{conf_matrix}\n")
-
-        # Display metrics
-        # disp = ConfusionMatrixDisplay(conf_matrix)
-        # disp.plot()
-        # plt.show()
+        return pred_avg
 
     def plottingFeatures(self):
         print("Happy data preprocessing and modeling!")
@@ -211,22 +188,24 @@ def getTestTrainSets():
 if __name__ == '__main__':
 
     max_iterations=2000
-    number_of_runs=1
+    number_of_runs=2
 
     testTrainSets = getTestTrainSets()
     X_train, X_test, y_train, y_test = testTrainSets
 
     ens = ensemble.Ensemble(train_test_sets=testTrainSets)
 
-    stack_accs, rf_pred, svm_pred, xgb_pred, stack_preds = ens.stacking(runs=number_of_runs)
+    rf_pred, svm_pred, xgb_pred, stack_preds = ens.stacking(runs=number_of_runs)
 
     #start timer
     start_time = time.time()
     # for i in range(number_of_runs): #If uncommenting: testrainset net to be computed every time
     datamodeling = MLP(testTrainSets)
-    mlp_preds, mlp_accs = datamodeling.mlp(max_iterations, True, runs=number_of_runs)
+    mlp_preds = datamodeling.mlp(max_iterations, runs=number_of_runs)
     print("--- %s seconds ---" % (time.time() - start_time))
-    print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(mlp_accs)/number_of_runs}")
+    # print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(mlp_accs)/number_of_runs}")
+
+    metrics.print_avg_metrics("MLP", mlp_preds, y_test)
 
     predictions = {"Stacking": stack_preds[0], 
                    "MLP": mlp_preds[0],}

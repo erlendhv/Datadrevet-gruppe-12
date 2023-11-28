@@ -15,6 +15,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import PolynomialFeatures
 
+import metrics
+
 
 class Ensemble:
     def __init__(self, train_test_sets=None):
@@ -55,21 +57,6 @@ class Ensemble:
         self.X_train_scaled = sc.fit_transform(self.X_train)
         self.X_test_scaled = sc.fit_transform(self.X_test)
 
-
-    # Evaluate the performance
-    # Define metrics
-    def metrics(self,modelStr, Y_test, Y_pred):
-        print("\n---------")
-        print(f"\nMetrics for {modelStr}:\n")
-        # Define metrics
-        class_report = classification_report(Y_test, Y_pred)
-        acc_score = accuracy_score(Y_test, Y_pred)
-        conf_matrix = confusion_matrix(list(Y_test), Y_pred)
-        
-        # Print metrics
-        print(class_report)
-        print(f"Accuracy for {modelStr}: \n{acc_score}")
-        print(f"Confusion matrix for {modelStr}: \n{conf_matrix}\n")
 
     """
     RANDOM FOREST TUNING
@@ -222,35 +209,31 @@ class Ensemble:
             # Make predictions
             y_pred = stacking_clf.predict(self.X_test)
             stack_preds.append(y_pred)
-            stack_accs.append(accuracy_score(y_true=self.y_test, y_pred=y_pred))
-            self.metrics("Stacking Classifier", self.y_test, y_pred)
+            metrics.print_metrics("Stacking Classifier", self.y_test, y_pred)
 
             rf = RandomForestClassifier(max_depth=9, max_features=3, n_estimators=300).fit(self.X_train, self.y_train)
             rf_pred = rf.predict(self.X_test)
             rf_preds.append(rf_pred)
-            rf_accs.append(accuracy_score(y_true=self.y_test, y_pred=rf_pred))
-            self.metrics('Random Forest', rf_pred, self.y_test)
+            metrics.print_metrics('Random Forest', rf_pred, self.y_test)
 
             svm = SVC(C=10, gamma=0.01, kernel='rbf').fit(self.X_train_scaled, self.y_train)
             svm_pred = svm.predict(self.X_test_scaled)
             svc_preds.append(svm_pred)
-            svc_accs.append(accuracy_score(y_true=self.y_test, y_pred=svm_pred))
-            self.metrics('SVM', svm_pred, self.y_test)
+            metrics.print_metrics('SVM', svm_pred, self.y_test)
 
             xgb = XGBClassifier(colsample_bytree=1.0, gamma=0, learning_rate=0.1, max_depth=3, min_child_weight=5, n_estimators=300, scale_pos_weight=1, subsample=0.9).fit(self.X_train, self.y_train)
             xgb_pred = xgb.predict(self.X_test)
             xgb_preds.append(xgb_pred)
-            xgb_accs.append(accuracy_score(y_true=self.y_test, y_pred=xgb_pred))
-            self.metrics('XGBoost', xgb_pred, self.y_test)
+            metrics.print_metrics('XGBoost', xgb_pred, self.y_test)
 
-        print('average for rf: ' + str(sum(rf_accs)/runs))
-        print('average for svc: ' + str(sum(svc_accs)/runs))
-        print('average for xgb: ' + str(sum(xgb_accs)/runs))
-        print('average for stacking: ' + str(sum(stack_accs)/runs))
+        metrics.print_avg_metrics("RF (Stacking)", rf_preds, self.y_test)
+        metrics.print_avg_metrics("SVC (Stacking)", rf_preds, self.y_test)
+        metrics.print_avg_metrics("XGB (Stacking)", rf_preds, self.y_test)
+        metrics.print_avg_metrics("Stacking", rf_preds, self.y_test)
         """
         Currently best: 0.87432188, using 13 or 15 features. XGBoost gets the same performance. Large variations each time. Stacking not consistently better
         """
-        return stack_accs, rf_preds, svc_preds, xgb_preds, stack_preds
+        return rf_preds, svc_preds, xgb_preds, stack_preds
 
     def two_layer_stack(self):
         models = [
@@ -289,7 +272,7 @@ class Ensemble:
 
         # Make predictions
         y_pred = second_layer.predict(self.X_test)
-        self.metrics("Stacking Classifier in two layers", self.y_test, y_pred)
+        metrics.print_metrics("Stacking Classifier in two layers", self.y_test, y_pred)
         """
         Stacking in two layers does not improve performance compared to just one layer.
 
@@ -328,7 +311,7 @@ def model_comparisons(y_test, predictions):
 
 if __name__ == '__main__':
     ensemble = Ensemble()
-    stack_accs, rf_preds, svm_preds, xgb_preds, stack_preds = ensemble.stacking(runs=1)
+    rf_preds, svm_preds, xgb_preds, stack_preds = ensemble.stacking(runs=1)
     predictions = {'RandomForest': rf_preds[0],
                     'SVC': svm_preds[0],
                     'XGBoost': xgb_preds[0],
