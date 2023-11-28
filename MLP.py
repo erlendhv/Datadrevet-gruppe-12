@@ -190,7 +190,7 @@ def getTestTrainSets():
 if __name__ == '__main__':
 
     max_iterations=2000
-    number_of_runs=1
+    number_of_runs=2
 
     testTrainSets = getTestTrainSets()
     X_train, X_test, y_train, y_test = testTrainSets
@@ -203,9 +203,11 @@ if __name__ == '__main__':
     start_time = time.time()
     # for i in range(number_of_runs): #If uncommenting: testrainset net to be computed every time
     datamodeling = MLP(testTrainSets)
-    mlp_preds, mlp_accs = datamodeling.mlp(max_iterations, True, runs=number_of_runs)
+    mlp_preds, mlp_accs = datamodeling.mlp(max_iterations, runs=number_of_runs)
     print("--- %s seconds ---" % (time.time() - start_time))
-    print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(mlp_accs)/number_of_runs}")
+    # print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(mlp_accs)/number_of_runs}")
+
+    metrics.print_avg_metrics("MLP", mlp_preds, y_test)
 
     predictions = {"Stacking": stack_preds[0], 
                    "MLP": mlp_preds[0],}
