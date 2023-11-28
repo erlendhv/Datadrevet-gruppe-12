@@ -44,4 +44,4 @@ def print_avg_metrics(modelStr, preds: list[list], y_test: list):
 
 
     print(f"Average accuracy for {modelStr} after {num_runs} run{'s'*min(num_runs-1,1)}: {avg_acc}")
-    print(f"Average f1_score for {modelStr} after {num_runs} run{'s'*min(num_runs-1,1)}: {avg_f1}")
+    print(f"Average F1-score for {modelStr} after {num_runs} run{'s'*min(num_runs-1,1)}: {avg_f1}")
