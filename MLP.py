@@ -77,19 +77,17 @@ class MLP:
         predictions = mlp.predict(self.X_test)
         # #print the metrics
         metrics.print_metrics("MLP", self.y_test, predictions)
-        return predictions, accuracy_score(self.y_test, predictions)
+        return predictions
 
     def mlp(self, maxIterations,tune=False, runs=3):
 
-        acc_avg = []
         pred_avg = []
 
         for _ in range(runs):
-            pred, acc = self.mlp_single(maxIterations,tune)
+            pred= self.mlp_single(maxIterations,tune)
             pred_avg.append(pred)
-            acc_avg.append(acc)
         
-        return pred_avg, acc_avg
+        return pred_avg
 
     def plottingFeatures(self):
         print("Happy data preprocessing and modeling!")
@@ -203,7 +201,7 @@ if __name__ == '__main__':
     start_time = time.time()
     # for i in range(number_of_runs): #If uncommenting: testrainset net to be computed every time
     datamodeling = MLP(testTrainSets)
-    mlp_preds, mlp_accs = datamodeling.mlp(max_iterations, runs=number_of_runs)
+    mlp_preds = datamodeling.mlp(max_iterations, runs=number_of_runs)
     print("--- %s seconds ---" % (time.time() - start_time))
     # print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(mlp_accs)/number_of_runs}")
 
