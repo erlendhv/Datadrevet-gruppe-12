@@ -4,7 +4,6 @@ import pandas as pd
 
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.ensemble import RandomForestClassifier
 from data_modeling import plot_learning_curve
 import seaborn as sns
@@ -12,6 +11,8 @@ import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.preprocessing import LabelEncoder
+
+import metrics
 
 
 
@@ -90,22 +91,6 @@ y_train = data['Target_Graduate']
 # unusedX, X_test, unusedY, y_test =  train_test_split(real_data[real_data.columns[real_data.columns != 'Target_Graduate']],
 #         real_data['Target_Graduate'], test_size=0.25, random_state=1)
 
-def metrics( modelStr, Y_test, Y_pred):
-
-    print("\n---------")
-    print(f"\nMetrics for {modelStr}:\n")
-
-    # Define metrics
-    class_report = classification_report(Y_test, Y_pred)
-    acc_score = accuracy_score(Y_test, Y_pred)
-    conf_matrix = confusion_matrix(list(Y_test), Y_pred)
-    
-
-    # Print metrics
-    print(class_report)
-    print(f"Accuracy for {modelStr}: \n{acc_score}")
-    print(f"Confusion matrix for {modelStr}: \n{conf_matrix}\n")
-
 
         # RANDOM FOREST
 def random_forest( X_train, y_train, X_test, y_test, tune = False, learning_curve = False):
@@ -143,7 +128,7 @@ def random_forest( X_train, y_train, X_test, y_test, tune = False, learning_curv
         plt.show()
 
 
-    metrics("Random Forest Classifier", y_test, y_pred)
+    metrics.print_metrics("Random Forest Classifier", y_test, y_pred)
 
     #This code is based on the svm code found at https://analyticsindiamag.com/understanding-the-basics-of-svm-with-example-and-python-implementation/
 def svm(X_train, Y_train, X_test, Y_test, tune = False, learning_curve = False):
