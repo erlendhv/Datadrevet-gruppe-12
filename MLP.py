@@ -195,7 +195,7 @@ if __name__ == '__main__':
 
     ens = ensemble.Ensemble(train_test_sets=testTrainSets)
 
-    stack_accs, rf_pred, svm_pred, xgb_pred, stack_preds = ens.stacking(runs=number_of_runs)
+    rf_pred, svm_pred, xgb_pred, stack_preds = ens.stacking(runs=number_of_runs)
 
     #start timer
     start_time = time.time()
