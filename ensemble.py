@@ -15,6 +15,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import PolynomialFeatures
 
+import metrics
+
 
 class Ensemble:
     def __init__(self, train_test_sets=None):
@@ -223,30 +225,35 @@ class Ensemble:
             y_pred = stacking_clf.predict(self.X_test)
             stack_preds.append(y_pred)
             stack_accs.append(accuracy_score(y_true=self.y_test, y_pred=y_pred))
-            self.metrics("Stacking Classifier", self.y_test, y_pred)
+            metrics.print_metrics("Stacking Classifier", self.y_test, y_pred)
 
             rf = RandomForestClassifier(max_depth=9, max_features=3, n_estimators=300).fit(self.X_train, self.y_train)
             rf_pred = rf.predict(self.X_test)
             rf_preds.append(rf_pred)
             rf_accs.append(accuracy_score(y_true=self.y_test, y_pred=rf_pred))
-            self.metrics('Random Forest', rf_pred, self.y_test)
+            metrics.print_metrics('Random Forest', rf_pred, self.y_test)
 
             svm = SVC(C=10, gamma=0.01, kernel='rbf').fit(self.X_train_scaled, self.y_train)
             svm_pred = svm.predict(self.X_test_scaled)
             svc_preds.append(svm_pred)
             svc_accs.append(accuracy_score(y_true=self.y_test, y_pred=svm_pred))
-            self.metrics('SVM', svm_pred, self.y_test)
+            metrics.print_metrics('SVM', svm_pred, self.y_test)
 
             xgb = XGBClassifier(colsample_bytree=1.0, gamma=0, learning_rate=0.1, max_depth=3, min_child_weight=5, n_estimators=300, scale_pos_weight=1, subsample=0.9).fit(self.X_train, self.y_train)
             xgb_pred = xgb.predict(self.X_test)
             xgb_preds.append(xgb_pred)
             xgb_accs.append(accuracy_score(y_true=self.y_test, y_pred=xgb_pred))
-            self.metrics('XGBoost', xgb_pred, self.y_test)
+            metrics.print_metrics('XGBoost', xgb_pred, self.y_test)
 
         print('average for rf: ' + str(sum(rf_accs)/runs))
         print('average for svc: ' + str(sum(svc_accs)/runs))
         print('average for xgb: ' + str(sum(xgb_accs)/runs))
         print('average for stacking: ' + str(sum(stack_accs)/runs))
+
+        metrics.print_avg_metrics("RF (Stacking)", rf_preds, self.y_test)
+        metrics.print_avg_metrics("SVC (Stacking)", rf_preds, self.y_test)
+        metrics.print_avg_metrics("XGB (Stacking)", rf_preds, self.y_test)
+        metrics.print_avg_metrics("Stacking", rf_preds, self.y_test)
         """
         Currently best: 0.87432188, using 13 or 15 features. XGBoost gets the same performance. Large variations each time. Stacking not consistently better
         """
