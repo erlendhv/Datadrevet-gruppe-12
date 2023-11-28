@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 def print_metrics(modelStr, Y_test=None, Y_pred=None, display_conf_matrix=False):
 
-    print(f"\n------- Average Metrics for {modelStr} -------\n")
+    print(f"\n------- Metrics for {modelStr} -------\n")
 
     # Define metrics
     class_report = classification_report(Y_test, Y_pred)
@@ -43,5 +43,5 @@ def print_avg_metrics(modelStr, preds: list[list], y_test: list):
     avg_f1 = avg_f1/num_runs
 
 
-    print(f"Average accuracy for MLP after {num_runs} run{'s'*min(num_runs-1,1)}: {avg_acc}")
-    print(f"Average f1_score for MLP after {num_runs} run{'s'*min(num_runs-1,1)}: {avg_f1}")
+    print(f"Average accuracy for {modelStr} after {num_runs} run{'s'*min(num_runs-1,1)}: {avg_acc}")
+    print(f"Average f1_score for {modelStr} after {num_runs} run{'s'*min(num_runs-1,1)}: {avg_f1}")
