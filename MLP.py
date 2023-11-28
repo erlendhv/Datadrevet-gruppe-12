@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import accuracy_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV, train_test_split
 from scipy.stats import randint
@@ -24,6 +24,7 @@ from sklearn.neural_network import MLPClassifier
 from features import select_best
 import time
 import ensemble
+import metrics
 
 class MLP:
 
@@ -75,7 +76,7 @@ class MLP:
         # #predict the test set
         predictions = mlp.predict(self.X_test)
         # #print the metrics
-        self.metrics("MLP", self.y_test, predictions)
+        metrics.print_metrics("MLP", self.y_test, predictions)
         return predictions, accuracy_score(self.y_test, predictions)
 
     def mlp(self, maxIterations,tune=False, runs=3):
@@ -89,28 +90,6 @@ class MLP:
             acc_avg.append(acc)
         
         return pred_avg, acc_avg
-
-   
-    def metrics(self, modelStr, Y_test, Y_pred):
-
-        print("\n---------")
-        print(f"\nMetrics for {modelStr}:\n")
-
-        # Define metrics
-        class_report = classification_report(Y_test, Y_pred)
-        acc_score = accuracy_score(Y_test, Y_pred)
-        conf_matrix = confusion_matrix(list(Y_test), Y_pred)
-        
-
-        # Print metrics
-        print(class_report)
-        print(f"Accuracy for {modelStr}: \n{acc_score}")
-        print(f"Confusion matrix for {modelStr}: \n{conf_matrix}\n")
-
-        # Display metrics
-        # disp = ConfusionMatrixDisplay(conf_matrix)
-        # disp.plot()
-        # plt.show()
 
     def plottingFeatures(self):
         print("Happy data preprocessing and modeling!")
