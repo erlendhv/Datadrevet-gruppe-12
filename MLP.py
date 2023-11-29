@@ -56,7 +56,7 @@ class MLP:
         #hyperparameter tuning
         if tune:
             parameter_space = {
-                'hidden_layer_sizes': [(50,50,50), (50,100,50), (100,)], #trying diffrent number of layers and difrrent neuron count
+                'hidden_layer_sizes': [(13),(13,7),(13,13),(13,7,7),(13,13,7),(13,13,13)], #trying diffrent number of layers and difrrent neuron count
                 'alpha': 10.0 ** -np.arange(1, 7),
                 'activation': ['identity', 'logistic', 'tanh', 'relu']
 
