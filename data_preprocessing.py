@@ -24,7 +24,7 @@ class Preprocessing:
         self.data.drop('Target_Enrolled', inplace=True, axis=1)
         self.data.drop('Target_Dropout', inplace=True, axis=1)
         
-    def standarize(self):
+    def standardizeMinMax(self):
         scaler = MinMaxScaler()
         self.data.iloc[:, :] = scaler.fit_transform(self.data.iloc[:, :])    
         
@@ -95,11 +95,28 @@ class Preprocessing:
             plt.show()
         
         return pca_result
+    
+    def generate_features(self):
+        # approved units rate for 1st and 2nd semester
+        self.data['units_approved_rate_1st'] = self.data['Curricular units 1st sem (approved)']/self.data['Curricular units 1st sem (enrolled)']
+        self.data['units_approved_rate_2nd'] = self.data['Curricular units 2nd sem (approved)']/self.data['Curricular units 2nd sem (enrolled)']
+        # replace NaN with 0, get NaN from new rate features
+        self.data.fillna(0, inplace=True)
+    
+    def generate_dataset_ensemble(self):
+
+        self.one_hot_encoding()
+        self.standardizeMinMax()
+        self.data.to_csv("graduation_dataset_preprocessed.csv")
+
+    def generate_dataset_mlp(self):
+
+        self.one_hot_encoding()
+        self.generate_features()
+        self.data.to_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")
 
 
 if __name__ == "__main__":
     print("Happy data preprocessing and modeling!")
     preprocessing = Preprocessing()
-    preprocessing.one_hot_encoding()
-    preprocessing.standarize()
-    preprocessing.data.to_csv("graduation_dataset_preprocessed.csv")
+    preprocessing.generate_dataset_mlp()
