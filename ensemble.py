@@ -227,9 +227,9 @@ class Ensemble:
             metrics.print_metrics('XGBoost', xgb_pred, self.y_test)
 
         metrics.print_avg_metrics("RF (Stacking)", rf_preds, self.y_test)
-        metrics.print_avg_metrics("SVC (Stacking)", rf_preds, self.y_test)
-        metrics.print_avg_metrics("XGB (Stacking)", rf_preds, self.y_test)
-        metrics.print_avg_metrics("Stacking", rf_preds, self.y_test)
+        metrics.print_avg_metrics("SVC (Stacking)", svc_preds, self.y_test)
+        metrics.print_avg_metrics("XGB (Stacking)", xgb_preds, self.y_test)
+        metrics.print_avg_metrics("Stacking", stack_preds, self.y_test)
         """
         Currently best: 0.87432188, using 13 or 15 features. XGBoost gets the same performance. Large variations each time. Stacking not consistently better
         """
