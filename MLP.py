@@ -79,7 +79,7 @@ class MLP:
         metrics.print_metrics("MLP", self.y_test, predictions)
         return predictions
 
-    def mlp(self, maxIterations,tune=False, runs=3):
+    def mlp(self, maxIterations,tune=True, runs=1):
 
         pred_avg = []
 
@@ -187,15 +187,12 @@ def getTestTrainSets():
 
 if __name__ == '__main__':
 
-    max_iterations=2000
-    number_of_runs=2
+    max_iterations=3000
+    number_of_runs=1
 
     testTrainSets = getTestTrainSets()
     X_train, X_test, y_train, y_test = testTrainSets
 
-    ens = ensemble.Ensemble(train_test_sets=testTrainSets)
-
-    rf_pred, svm_pred, xgb_pred, stack_preds = ens.stacking(runs=number_of_runs)
 
     #start timer
     start_time = time.time()
@@ -203,11 +200,5 @@ if __name__ == '__main__':
     datamodeling = MLP(testTrainSets)
     mlp_preds = datamodeling.mlp(max_iterations, runs=number_of_runs)
     print("--- %s seconds ---" % (time.time() - start_time))
-    # print(f"Average accuracy for MLP after {number_of_runs} run{'s'*min(number_of_runs-1,1)}: {sum(mlp_accs)/number_of_runs}")
-
     metrics.print_avg_metrics("MLP", mlp_preds, y_test)
-
-    predictions = {"Stacking": stack_preds[0], 
-                   "MLP": mlp_preds[0],}
-    ensemble.model_comparisons(y_test, predictions)
     
