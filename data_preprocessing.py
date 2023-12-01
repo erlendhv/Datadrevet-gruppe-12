@@ -102,17 +102,36 @@ class Preprocessing:
         self.data['units_approved_rate_2nd'] = self.data['Curricular units 2nd sem (approved)']/self.data['Curricular units 2nd sem (enrolled)']
         # replace NaN with 0, get NaN from new rate features
         self.data.fillna(0, inplace=True)
+
+        # Move target to last column
+        column = self.data.pop('Target_Graduate')
+        self.data.insert(len(self.data.columns), 'Target_Graduate', column)
+
+    # method for selecting n best features.
+    def find_n_best(self, n):
+        x = self.data.drop(['Target_Graduate'], axis=1)
+        y = self.data['Target_Graduate']
+        # using score function mutual information to capture complex relations
+        sel_k_best = SelectKBest(k=n, score_func=mutual_info_classif)
+        features = sel_k_best.fit_transform(x,y)
+        # print(dict(zip(x.columns, sel_k_best.scores_)))
+        return [x.columns[feature] for feature in sel_k_best.get_support(indices=True)]
+
+    def select_best(self, num_features):
+        best_features = self.find_n_best(num_features, self.data)
+        for feature in self.data.columns:
+            if feature not in best_features and feature != 'Target_Graduate':
+                self.data.drop(feature, axis=1, inplace=True)
     
     def generate_dataset_ensemble(self):
-
         self.one_hot_encoding()
         self.standardizeMinMax()
         self.data.to_csv("graduation_dataset_preprocessed.csv")
 
-    def generate_dataset_mlp(self):
-
+    def generate_dataset_mlp(self, feature_extract=True, feature_select=True):
         self.one_hot_encoding()
         self.generate_features()
+        self.select_best(13)
         self.data.to_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")
 
 
