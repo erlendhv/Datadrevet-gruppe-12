@@ -118,7 +118,7 @@ class Preprocessing:
         return [x.columns[feature] for feature in sel_k_best.get_support(indices=True)]
 
     def select_best(self, num_features):
-        best_features = self.find_n_best(num_features, self.data)
+        best_features = self.find_n_best(num_features)
         for feature in self.data.columns:
             if feature not in best_features and feature != 'Target_Graduate':
                 self.data.drop(feature, axis=1, inplace=True)
