@@ -65,7 +65,8 @@ class MLP:
             grid.fit(self.X_train, self.y_train)
 
             best_params = grid.best_params_
-            print(f"Best params: {best_params}")
+            if verbose:
+                print(f"Best params: {best_params}")
         else:
             best_params={'activation': 'identity', 'alpha': 0.1, 'hidden_layer_sizes': (50, 100, 50)}
        
