@@ -17,7 +17,7 @@ from data_preprocessing import Preprocessing
 from sklearn.metrics import accuracy_score, f1_score
 
 
-def test_optimal_num_features(max_features=35, max_iterations=3000, runs=5, cv_folds=5):
+def test_optimal_num_features(max_features=3, max_iterations=3000, runs=5, cv_folds=5):
 
     feature_results = []
 
@@ -51,16 +51,18 @@ def plot_num_features(feature_results):
     plt.figure(figsize=(12, 6))
     
     plt.subplot(1, 2, 1)
-    plt.plot(num_features, acc_scores, marker='o', linestyle='-')
-    plt.title('Accuracy vs. Number of Features')
+    plt.plot(num_features, acc_scores, marker='o', linestyle='-', color="r")
+    plt.title('Accuracy')
     plt.xlabel('Number of Features')
     plt.ylabel('Accuracy')
 
     plt.subplot(1, 2, 2)
-    plt.plot(num_features, f1_scores, marker='o', linestyle='-')
-    plt.title('F1 Score vs. Number of Features')
+    plt.plot(num_features, f1_scores, marker='o', linestyle='-', color="b")
+    plt.title('F1 Score')
     plt.xlabel('Number of Features')
     plt.ylabel('F1 Score')
+    
+    plt.grid(True)
 
     plt.tight_layout()
     plt.show()
