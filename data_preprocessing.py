@@ -128,17 +128,17 @@ class Preprocessing:
         self.standardizeMinMax()
         self.data.to_csv("graduation_dataset_preprocessed.csv")
 
-    def generate_dataset_mlp(self, feature_extract=False, feature_select=True):
+    def generate_dataset_mlp(self, num_features, feature_extract=False, feature_select=True):
         self.one_hot_encoding()
         if feature_extract and feature_select:
             self.generate_features()
-            self.select_best(13)
+            self.select_best(num_features)
             self.data.to_csv("MLP_graduation_dataset_preprocessed_feature_extracted_selected.csv")
         elif feature_extract:
             self.generate_features()
             self.data.to_csv("MLP_graduation_dataset_preprocessed_feature_extracted.csv")
         elif feature_select:
-            self.select_best(13)
+            self.select_best(num_features)
             self.data.to_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")
         else:
             self.data.to_csv("MLP_graduation_dataset_preprocessed.csv")
@@ -147,4 +147,4 @@ class Preprocessing:
 if __name__ == "__main__":
     print("Happy data preprocessing and modeling!")
     preprocessing = Preprocessing()
-    preprocessing.generate_dataset_mlp()
+    preprocessing.generate_dataset_mlp(13)
