@@ -43,7 +43,7 @@ class MLP:
         
 
 
-    def mlp_single(self, maxIterations,tune=False):
+    def mlp_single(self, maxIterations,tune=False, verbose=True):
         #standardize data
         #from the documentation https://scikit-learn.org/stable/modules/neural_networks_supervised.html
         scaler = StandardScaler()  
@@ -76,15 +76,16 @@ class MLP:
         # #predict the test set
         predictions = mlp.predict(self.X_test)
         # #print the metrics
-        metrics.print_metrics("MLP", self.y_test, predictions)
+        if verbose:
+            metrics.print_metrics("MLP", self.y_test, predictions)
         return predictions
 
-    def mlp(self, maxIterations,tune=True, runs=1):
+    def mlp(self, maxIterations,tune=True, runs=1, verbose=True):
 
         pred_avg = []
 
         for _ in range(runs):
-            pred= self.mlp_single(maxIterations,tune)
+            pred= self.mlp_single(maxIterations,tune, verbose)
             pred_avg.append(pred)
         
         return pred_avg

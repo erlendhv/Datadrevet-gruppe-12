@@ -30,7 +30,7 @@ def test_optimal_num_features(max_features=35, max_iterations=3000, runs=5, cv_f
 
         # Generate model instance using these features
         model = MLP()
-        pred = model.mlp(max_iterations)[0]
+        pred = model.mlp(max_iterations, verbose=False)[0]
 
         acc_score = accuracy_score(model.y_test, pred)
         f1 = f1_score(model.y_test, pred)
