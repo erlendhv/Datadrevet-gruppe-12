@@ -17,7 +17,7 @@ from data_preprocessing import Preprocessing
 from sklearn.metrics import accuracy_score, f1_score
 
 
-def test_optimal_num_features(max_features=3, max_iterations=3000, runs=5, cv_folds=5):
+def test_optimal_num_features(max_features=2, max_iterations=3000, runs=5, cv_folds=5, save_to_file=True):
 
     feature_results = []
 
@@ -38,7 +38,17 @@ def test_optimal_num_features(max_features=3, max_iterations=3000, runs=5, cv_fo
 
         feature_results.append((num_features, acc_score, f1))
 
+        if save_to_file:
+            save_num_features(feature_results)
+
     return feature_results
+
+def save_num_features(feature_results, save_to_file="MLP_num_features_with_result"):
+    df = pd.DataFrame(feature_results, columns=['Number of Features', 'Accuracy', 'F1 Score'])
+
+    # Save the DataFrame to a CSV file if a filename is provided
+    if save_to_file:
+        df.to_csv(save_to_file, index=False)
 
 def plot_num_features(feature_results):
 
@@ -56,17 +66,24 @@ def plot_num_features(feature_results):
     plt.xlabel('Number of Features')
     plt.ylabel('Accuracy')
 
+    plt.xticks(num_features)
+    plt.grid(True)
+
     plt.subplot(1, 2, 2)
     plt.plot(num_features, f1_scores, marker='o', linestyle='-', color="b")
     plt.title('F1 Score')
     plt.xlabel('Number of Features')
     plt.ylabel('F1 Score')
     
+    plt.xticks(num_features)
     plt.grid(True)
 
     plt.tight_layout()
     plt.show()
 
 # Call the plot function
-plot_num_features(test_optimal_num_features())
+
+feature_res = test_optimal_num_features()
+save_num_features(feature_res)
+plot_num_features(feature_res)
 
