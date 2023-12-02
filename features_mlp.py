@@ -36,6 +36,7 @@ def test_optimal_num_features(max_features=35, max_iterations=3000, runs=5, cv_f
         f1 = f1_score(model.y_test, pred)
 
         feature_results.append((num_features, acc_score, f1))
+        print(f"\n Testing number of features: {num_features}\n")
 
     return feature_results
 
