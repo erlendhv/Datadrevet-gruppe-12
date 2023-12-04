@@ -18,7 +18,7 @@ from sklearn.metrics import accuracy_score, f1_score
 
 
 #NB! Executes WITH feature extraction (and selection)
-def test_optimal_num_features(max_features=34, max_iterations=3000, runs=5, cv_folds=5, save_to_file=True):
+def test_optimal_num_features(max_features=35, max_iterations=3000, runs=5, cv_folds=5, save_to_file=True):
 
     feature_results = []
 
@@ -83,7 +83,7 @@ def plot_num_features(feature_results):
 
 def plot_num_features():
 
-    df = pd.read_csv("MLP_num_features_with_result")  
+    df = pd.read_csv("MLP_num_features_with_result.csv")  
 
     # Plotting
     plt.figure(figsize=(10, 6))
