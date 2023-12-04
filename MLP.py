@@ -28,11 +28,14 @@ import metrics
 
 class MLP:
 
-    def __init__(self, train_test_sets=None) -> None:
+    def __init__(self, train_test_sets=None, dataset_with_feature_extraction=True) -> None:
         # Load your dataset
 
         if train_test_sets is None:
-            self.data = pd.read_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")  
+            if dataset_with_feature_extraction:
+                self.data = pd.read_csv("MLP_graduation_dataset_preprocessed_feature_extracted_selected.csv")
+            else:
+                self.data = pd.read_csv("MLP_graduation_dataset_preprocessed_feature_selected.csv")
             # Split the data into test and train
             self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target_Graduate']],
                                                                                     self.data['Target_Graduate'], test_size=0.25, random_state=1)
