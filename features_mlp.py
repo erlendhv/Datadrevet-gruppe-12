@@ -17,7 +17,8 @@ from data_preprocessing import Preprocessing
 from sklearn.metrics import accuracy_score, f1_score
 
 
-def test_optimal_num_features(max_features=2, max_iterations=3000, runs=5, cv_folds=5, save_to_file=True):
+#NB! Executes WITH feature extraction (and selection)
+def test_optimal_num_features(max_features=34, max_iterations=3000, runs=5, cv_folds=5, save_to_file=True):
 
     feature_results = []
 
@@ -27,7 +28,7 @@ def test_optimal_num_features(max_features=2, max_iterations=3000, runs=5, cv_fo
         print(f"\n Testing number of features: {num_features}\n")
         # Generate dataset with right number of features
         preproc = Preprocessing()
-        preproc.generate_dataset_mlp(num_features)
+        preproc.generate_dataset_mlp(num_features, feature_extract=True)
 
         # Generate model instance using these features
         model = MLP()
@@ -43,12 +44,11 @@ def test_optimal_num_features(max_features=2, max_iterations=3000, runs=5, cv_fo
 
     return feature_results
 
-def save_num_features(feature_results, save_to_file="MLP_num_features_with_result"):
+def save_num_features(feature_results, save_to_file="MLP_num_features_with_results_v2.csv"):
     df = pd.DataFrame(feature_results, columns=['Number of Features', 'Accuracy', 'F1 Score'])
 
-    # Save the DataFrame to a CSV file if a filename is provided
-    if save_to_file:
-        df.to_csv(save_to_file, index=False)
+    # Save the DataFrame to a CSV file
+    df.to_csv(save_to_file, index=False)
 
 def plot_num_features(feature_results):
 
@@ -81,9 +81,27 @@ def plot_num_features(feature_results):
     plt.tight_layout()
     plt.show()
 
+def plot_num_features():
+
+    df = pd.read_csv("MLP_num_features_with_result")  
+
+    # Plotting
+    plt.figure(figsize=(10, 6))
+    plt.plot(df["Number of Features"], df["Accuracy"], label="Accuracy", marker='o')
+    plt.plot(df["Number of Features"], df["F1 Score"], label="F1 Score", marker='o')
+    plt.xlabel("Number of Features")
+    plt.ylabel("Score")
+    plt.title("Accuracy and F1 Score vs Number of Features")
+    plt.xticks(df["Number of Features"])  # Only show integers on the x-axis
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
 # Call the plot function
 
-feature_res = test_optimal_num_features()
-save_num_features(feature_res)
-plot_num_features(feature_res)
+# feature_res = test_optimal_num_features()
+# save_num_features(feature_res)
+# plot_num_features(feature_res)
+plot_num_features()
 
