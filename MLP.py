@@ -196,15 +196,12 @@ if __name__ == '__main__':
     max_iterations=3000
     number_of_runs=1
 
-    testTrainSets = getTestTrainSets()
-    X_train, X_test, y_train, y_test = testTrainSets
-
-
     #start timer
     start_time = time.time()
-    # for i in range(number_of_runs): #If uncommenting: testrainset net to be computed every time
-    datamodeling = MLP(testTrainSets)
+    
+    datamodeling = MLP()
     mlp_preds = datamodeling.mlp(max_iterations, runs=number_of_runs)
+
     print("--- %s seconds ---" % (time.time() - start_time))
-    metrics.print_avg_metrics("MLP", mlp_preds, y_test)
+    # metrics.print_avg_metrics("MLP", mlp_preds, y_test)
     
