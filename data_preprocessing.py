@@ -128,7 +128,7 @@ class Preprocessing:
         self.standardizeMinMax()
         self.data.to_csv("graduation_dataset_preprocessed.csv")
 
-    def generate_dataset_mlp(self, num_features, feature_extract=False, feature_select=True):
+    def generate_dataset_mlp(self, num_features, feature_extract=True, feature_select=True):
         self.one_hot_encoding()
         if feature_extract and feature_select:
             self.generate_features()
