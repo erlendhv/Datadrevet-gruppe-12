@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import random
 from ast import If
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -122,6 +123,29 @@ class Preprocessing:
         for feature in self.data.columns:
             if feature not in best_features and feature != 'Target_Graduate':
                 self.data.drop(feature, axis=1, inplace=True)
+
+    def reduce_dataset(self, dataset_size=1):
+        """
+        Reduces the size of the dataset by randomly selecting a subset of rows based on the specified dataset size.
+
+        Parameters:
+        - dataset_size (float, optional): A float between 0 (exclusive) and 1 (inclusive) specifying the fraction of the dataset to retain. Defaults to 1, which means no reduction.
+
+        Raises:
+        - ValueError: If the dataset_size is not between 0 (exclusive) and 1 (inclusive).
+
+        Note:
+        - Recompute training and test sets
+        """
+        if not 0 < dataset_size <= 1:
+            raise ValueError("Column percentage must be between 0 and 1")
+        
+        #Choose random subset of columns
+        self.data.sample(frac=dataset_size)
+
+        #Recompute training/test sets
+        self.X_train, self.X_test, self.y_train, self.y_test = self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target']],self.data['Target'], test_size=0.25, random_state=1)
+
     
     def generate_dataset_ensemble(self):
         self.one_hot_encoding()
