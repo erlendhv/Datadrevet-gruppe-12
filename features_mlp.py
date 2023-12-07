@@ -16,7 +16,6 @@ from MLP import MLP
 from data_preprocessing import Preprocessing
 from sklearn.metrics import accuracy_score, f1_score
 
-
 #NB! Executes WITH feature extraction (and selection)
 def test_optimal_num_features(max_features=35, max_iterations=3000, runs=5, cv_folds=5, save_to_file=True):
 
@@ -26,13 +25,23 @@ def test_optimal_num_features(max_features=35, max_iterations=3000, runs=5, cv_f
     for num_features in range(1, max_features+1):
 
         print(f"\n Testing number of features: {num_features}\n")
+
         # Generate dataset with right number of features
-        preproc = Preprocessing()
-        preproc.generate_dataset_mlp(num_features, feature_extract=True)
+        Preprocessing().gen_mlp_subset(dataset_size=0.1, num_features=num_features, filename="tmp_MLP")
 
         # Generate model instance using these features
-        model = MLP()
-        pred = model.mlp(max_iterations, verbose=False)[0]
+        model = MLP(dataset_file="tmp_MLP")
+        preds = model.mlp(max_iterations, runs=3, verbose=False)
+
+        avg_acc = 0
+        avg_f1 = 0
+        num_runs = 0
+        for pred in preds:
+            avg_acc += accuracy_score(model.y_test, pred)
+            avg_f1 += f1_score(model.y_test, pred)
+            num_runs += 1
+        avg_acc = avg_acc/num_runs
+        avg_f1 = avg_f1/num_runs
 
         acc_score = accuracy_score(model.y_test, pred)
         f1 = f1_score(model.y_test, pred)
@@ -100,8 +109,8 @@ def plot_num_features():
 
 # Call the plot function
 
-# feature_res = test_optimal_num_features()
+feature_res = test_optimal_num_features()
 # save_num_features(feature_res)
 # plot_num_features(feature_res)
-plot_num_features()
+# plot_num_features()
 
