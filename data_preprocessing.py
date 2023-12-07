@@ -167,6 +167,13 @@ class Preprocessing:
         else:
             self.data.to_csv("MLP_graduation_dataset_preprocessed.csv")
 
+    def gen_mlp_subset(self, dataset_size=1, num_features=35, filename="MLP_feature_selection_testing"):
+        self.reduce_dataset(dataset_size)
+        self.one_hot_encoding()
+        self.generate_features()
+        self.select_best(num_features)
+        self.data.to_csv(filename)
+
 
 if __name__ == "__main__":
     print("Happy data preprocessing and modeling!")
