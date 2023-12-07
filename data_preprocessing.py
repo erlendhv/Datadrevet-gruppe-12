@@ -141,7 +141,7 @@ class Preprocessing:
             raise ValueError("Column percentage must be between 0 and 1")
         
         #Choose random subset of columns
-        self.data.sample(frac=dataset_size)
+        self.data = self.data.sample(frac=dataset_size)
 
         #Recompute training/test sets
         self.X_train, self.X_test, self.y_train, self.y_test = self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.data[self.data.columns[self.data.columns != 'Target']],self.data['Target'], test_size=0.25, random_state=1)
