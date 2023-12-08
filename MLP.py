@@ -65,7 +65,7 @@ class MLP:
         #hyperparameter tuning
         if tune:
             parameter_space = {
-                'hidden_layer_sizes': [(13),(13,7),(13,13),(13,7,7),(13,13,7),(13,13,13)], #trying diffrent number of layers and difrrent neuron count
+                'hidden_layer_sizes': [(16),(16,8),(16,16),(16,8,8),(16,16,8),(16,16,16)], #trying diffrent number of layers and difrrent neuron count
                 'alpha': 10.0 ** -np.arange(1, 7),
                 'activation': ['identity', 'logistic', 'tanh', 'relu']
 
@@ -200,7 +200,7 @@ def getTestTrainSets():
 if __name__ == '__main__':
 
     max_iterations=3000
-    number_of_runs=1
+    number_of_runs=3
 
     #start timer
     start_time = time.time()
